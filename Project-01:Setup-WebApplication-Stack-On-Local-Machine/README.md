@@ -192,3 +192,56 @@ sudo systemctl restart memcached
 sudo memcached -p 11211 -U 11111 -u memcache -d
 ```
 
+### Setup VM for RabbitMQ
+
+Login to rmq01 instance and install the required packages
+
+```
+vagrant ssh rmq01
+sudo yum update -y
+```
+
+Disable SELINUX on the virual machine 
+
+```
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+sudo setenforce 0
+```
+
+Install dependencies and rabbitmq-server package
+
+```
+curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
+sudo yum clean all
+sudo yum makecache
+sudo yum install erlang -y
+sudo yum install rabbitmq-server -y
+```
+
+Start and enable the service 
+
+```
+sudo systemctl start rabbitmq-server
+sudo systemctl enable rabbitmq-server
+sudo systemctl status rabbitmq-server
+```
+
+Make configuration changes in configuration file
+
+```
+sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
+sudo rabbitmqctl add_user test test
+sudo rabbitmqctl set_user_tags test administrator
+```
+
+Configure firewall for rabbitmq-server port 
+
+```
+sudo firewall-cmd --add-port=5671/tcp --permanent 
+sudo firewall-cmd --add-port=5672/tcp --permanent # firewall-cmd --reload
+sudo firewall-cmd --zone=public --add-port=25672/tcp --permanent    #This port is used for inter-node communication.
+sudo firewall-cmd --reload
+sudo systemctl restart rabbitmq-server
+sudo reboot
+```
+
