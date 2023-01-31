@@ -111,3 +111,24 @@ mysql_secure_installation
 - [ ] *Remove test database and access to it? Y*
 
 - [ ] *Reload privilege tables now? Y*
+
+
+Set Database and user details 
+
+```
+mysql -u root -padmin123
+```
+
+```
+mysql> create database accounts;
+mysql> grant all privileges on accounts.* TO 'admin'@’%’ identified by 'admin123' ; mysql> FLUSH PRIVILEGES;
+mysql> exit;
+```
+
+Initialize the database
+
+```
+mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
+mysql -u root -padmin123 accounts
+mysql> show tables;
+```
