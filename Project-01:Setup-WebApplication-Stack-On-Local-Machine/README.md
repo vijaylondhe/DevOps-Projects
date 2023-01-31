@@ -102,12 +102,12 @@ Run the database installation script
 mysql_secure_installation
 ```
 
-- [ ] ***Set user password: admin123***
+- [ ] *Set user password: admin123*
 
-- [ ] ***Remove Anonymous User? Y***
+- [ ] *Remove Anonymous User? Y*
 
-- [ ] ***Disallow root login remotely? Y***
+- [ ] *Disallow root login remotely? Y*
 
-- [ ] ***Remove test database and access to it? Y***
+- [ ] *Remove test database and access to it? Y*
 
-- [ ] ***Reload privilege tables now? Y***  
+- [ ] *Reload privilege tables now? Y*
