@@ -67,5 +67,5 @@ Check host file is automatically updated by host-manager vagrant plugin.
 cat /etc/hosts
 ```
 
-![GitHub Light](./snaps/vagrant_db01_host_file)
+![GitHub Light](./snaps/vagrant_db01_host_file.png)
 
