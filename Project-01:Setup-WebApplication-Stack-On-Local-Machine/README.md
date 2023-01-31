@@ -17,7 +17,7 @@ In this project we will setup the Web Application Stack on the local machine usi
 
 - Oracle Virtual Box (for Windows)/ VMware Fusion Tech (for MacOS)
 - Vagrant (for VM automation)
-- Vagrant Plugin (vagrant-hostmanager/vagrant-vmware-desktop) 
+- Vagrant Plugin (vagrant-hostmanager/vagrant-vbguest/vagrant-vmware-desktop) 
 - Git
 - JDK8
 - Maven 
@@ -34,4 +34,14 @@ Clone the repository
 
 ```
 git clone https://github.com/vijaylondhe/vprofile-project.git
+```
+
+```
+cd vagrant/Manual_provisioning_MacOSM1
+```
+
+Run the virtual machines
+
+```
+vagrant up
 ```
