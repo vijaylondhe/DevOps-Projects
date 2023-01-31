@@ -55,7 +55,7 @@ vagrant status
 ![GitHub Light](./snaps/vagrant_status.png)
 
 
-Log into MySQL Virtual Machine:
+Login into MySQL Virtual Machine:
 
 ```
 vagrant ssh db01
@@ -69,3 +69,37 @@ cat /etc/hosts
 
 ![GitHub Light](./snaps/vagrant_db01_host_file.png)
 
+
+Update the repository and install MariaDB package
+
+```
+sudo yum update -y
+```
+
+```
+sudo yum install epel-release -y 
+```
+
+```
+sudo yum install git mariadb-server -y
+
+```
+
+Start and Enable MariaDB server
+
+```
+systemctl start mariadb
+systemctl enable mariadb
+```
+
+Run the database installation script 
+
+```
+mysql_secure_installation
+```
+
+Set user password: admin123
+Remove Anonymous User? Y
+Disallow root login remotely? Y
+Remove test database and access to it? Y
+Reload privilege tables now? Y  
