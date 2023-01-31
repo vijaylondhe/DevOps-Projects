@@ -53,3 +53,19 @@ vagrant status
 ```
 
 ![GitHub Light](./snaps/vagrant_status.png)
+
+
+Log into MySQL Virtual Machine:
+
+```
+vagrant ssh db01
+```
+
+Check host file is automatically updated by host-manager vagrant plugin.
+
+```
+cat /etc/hosts
+```
+
+![GitHub Light](./snaps/vagrant_db01_host_file)
+
