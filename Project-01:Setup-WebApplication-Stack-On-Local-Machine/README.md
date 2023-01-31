@@ -132,3 +132,19 @@ mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
 mysql -u root -padmin123 accounts
 mysql> show tables;
 ```
+
+Restart the database service
+
+```
+systemctl restart mariadb
+```
+
+Configure firewall for mariadb database on port 3306
+
+```
+systemctl start firewalld
+systemctl enable firewalld
+firewall-cmd --get-active-zones
+firewall-cmd --zone=public --add-port=3306/tcp --permanent # firewall-cmd --reload
+systemctl restart mariadb
+```
