@@ -26,7 +26,7 @@ In this project we will setup the Web Application Stack on the local machine usi
 
 ## Architecture 
 
-![GitHub Light](/snaps/web-app-stack-local.png)
+![GitHub Light](./snaps/web-app-stack-local.png)
 
 ## Step 1: Setup Virtual Machines
 
