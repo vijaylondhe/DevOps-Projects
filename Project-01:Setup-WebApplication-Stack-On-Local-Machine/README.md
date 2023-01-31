@@ -45,3 +45,11 @@ Run the virtual machines
 ```
 vagrant up
 ```
+
+Note: This will bring up all the virtual machines listed in Vagrantfile, execute the below command to see the status of virtual machines 
+
+```
+vagrant status
+```
+
+![GitHub Light](./snaps/vagrant_status.png)
