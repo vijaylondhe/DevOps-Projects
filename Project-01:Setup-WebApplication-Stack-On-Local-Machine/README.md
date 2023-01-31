@@ -30,6 +30,7 @@ In this project we will setup the Web Application Stack on the local machine usi
 
 ## Step 1: Setup Virtual Machines
 
+
 Clone the repository
 
 ```
@@ -53,6 +54,9 @@ vagrant status
 ```
 
 ![GitHub Light](./snaps/vagrant_status.png)
+
+
+### Setup VM for MySQL 
 
 
 Login into MySQL Virtual Machine:
@@ -99,7 +103,11 @@ mysql_secure_installation
 ```
 
 Set user password: admin123
+
 Remove Anonymous User? Y
+
 Disallow root login remotely? Y
+
 Remove test database and access to it? Y
+
 Reload privilege tables now? Y  
