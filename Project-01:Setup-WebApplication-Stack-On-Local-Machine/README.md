@@ -159,6 +159,7 @@ sudo systemctl restart mariadb
 Login to mc01 virtual machine and install memcached package.
 
 ```
+vagrant ssh mc01
 sudo yum update -y 
 sudo yum install memcached -y
 ```
