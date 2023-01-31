@@ -92,14 +92,14 @@ sudo yum install git mariadb-server -y
 Start and Enable MariaDB server
 
 ```
-systemctl start mariadb
-systemctl enable mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
 ```
 
 Run the database installation script 
 
 ```
-mysql_secure_installation
+sudo mysql_secure_installation
 ```
 
 - [ ] *Set user password: admin123*
@@ -116,35 +116,78 @@ mysql_secure_installation
 Set Database and user details 
 
 ```
-mysql -u root -padmin123
+sudo mysql -u root -padmin123
 ```
 
 ```
 mysql> create database accounts;
-mysql> grant all privileges on accounts.* TO 'admin'@’%’ identified by 'admin123' ; mysql> FLUSH PRIVILEGES;
+mysql> grant all privileges on accounts.* TO 'admin'@'db01' identified by 'admin123';
+mysql> FLUSH PRIVILEGES;
 mysql> exit;
 ```
 
-Initialize the database
+Download the source code and initialize the database
 
 ```
-mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
-mysql -u root -padmin123 accounts
+git clone https://github.com/vijaylondhe/vprofile-project.git
+cd /home/vagrant/vprofile-project
+sudo mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
+sudo mysql -u root -padmin123 accounts
 mysql> show tables;
 ```
 
 Restart the database service
 
 ```
-systemctl restart mariadb
+sudo systemctl restart mariadb
 ```
 
 Configure firewall for mariadb database on port 3306
 
 ```
-systemctl start firewalld
-systemctl enable firewalld
-firewall-cmd --get-active-zones
-firewall-cmd --zone=public --add-port=3306/tcp --permanent # firewall-cmd --reload
-systemctl restart mariadb
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent 
+sudo firewall-cmd --reload
+sudo systemctl restart mariadb
 ```
+
+
+### Setup VM for Memcached
+
+Login to mc01 virtual machine and install memcached package.
+
+```
+sudo yum update -y 
+sudo yum install memcached -y
+```
+
+Start and enable the service 
+
+```
+sudo systemctl start memcached
+sudo systemctl enable memcached
+sudo systemctl status memcached
+```
+
+Configure firewall for memcached port 11211
+
+```
+sudo firewall-cmd --add-port=11211/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+Make the changes in memcached configuration file
+
+```
+sudo sed -i 's/OPTIONS="-l 127.0.0.1"/OPTIONS=""/' /etc/sysconfig/memcached
+```
+
+Restart and configure the memcached service 
+
+```
+sudo systemctl restart memcached 
+sudo memcached -p 11211 -U 11111 -u memcache -d
+```
+
