@@ -75,6 +75,23 @@ cat /etc/hosts
 
 ![GitHub Light](./snaps/vagrant_db01_host_file.png)
 
+Set environment variable for db user password
+
+```
+DATABASE_PASS='admin123'
+```
+
+Make it permenent
+
+```
+vi /etc/profile
+DATABASE_PASS='admin123'
+```
+
+```
+source /etc/profile
+```
+
 
 Update the repository and install MariaDB package
 
@@ -108,34 +125,34 @@ sudo mysql_secure_installation
 
 - [ ] *Remove Anonymous User? Y*
 
-- [ ] *Disallow root login remotely? Y*
+- [ ] *Disallow root login remotely? n*
 
 - [ ] *Remove test database and access to it? Y*
 
 - [ ] *Reload privilege tables now? Y*
 
 
-Set Database and user details 
-
-```
-sudo mysql -u root -padmin123
-```
-
-```
-mysql> create database accounts;
-mysql> grant all privileges on accounts.* TO 'admin'@'db01' identified by 'admin123';
-mysql> FLUSH PRIVILEGES;
-mysql> exit;
-```
 
 Download the source code and initialize the database
 
 ```
 git clone https://github.com/vijaylondhe/vprofile-project.git
-cd /home/vagrant/vprofile-project
-sudo mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
-sudo mysql -u root -padmin123 accounts
-mysql> show tables;
+cd vprofile-project/src/main/resources/
+mysql -u root -p"$DATABASE_PASS" -e "create database accounts"
+mysql -u root -p"$DATABASE_PASS" -e "grant all privileges on accounts.* TO 'admin'@'app01' identified by 'admin123' "
+cd ../../..
+mysql -u root -p"$DATABASE_PASS" accounts < src/main/resources/db_backup.sql
+mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
+```
+
+Login to the database and verify
+
+```
+mysql -u root -p"$DATABASE_PASS"
+MariaDB [(none)]> show databases;
+MariaDB [(none)]> use accounts;
+MariaDB [(none)]> show tables;
+exit
 ```
 
 Restart the database service
@@ -228,7 +245,7 @@ sudo systemctl enable rabbitmq-server
 sudo systemctl status rabbitmq-server
 ```
 
-Make configuration changes in configuration file
+Make configuration changes in configuration file, add test user with test password and create user tag as administrator
 
 ```
 sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
@@ -437,4 +454,15 @@ Restart the nginx service
 ```
 sudo systemctl restart nginx
 ```
+
+
+### Test the Application from browser 
+
+Take IP Address of nginx virtual machine using ip addr command and enter following URL in the browser 
+
+```
+http://192.168.56.11
+```
+
+
 
