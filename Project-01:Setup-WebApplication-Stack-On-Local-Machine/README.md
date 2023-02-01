@@ -323,3 +323,69 @@ sudo echo 'JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' > /etc/java/maven.conf
 sudo yum install java-1.8.0-openjdk-devel -y
 ```
 
+### Build the code and Deploy the application
+
+Clone the repository
+
+```
+git clone https://github.com/vijaylondhe/vprofile-project.git
+cd vprofile-project/src/main/resources/
+```
+
+Update the configuration in application.properties 
+
+```
+vim application.properties
+
+#JDBC Configutation for Database Connection
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://db01:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+jdbc.username=admin
+jdbc.password=admin123
+
+#Memcached Configuration For Active and StandBy Host
+#For Active Host
+memcached.active.host=mc01
+memcached.active.port=11211
+#For StandBy Host
+memcached.standBy.host=127.0.0.2
+memcached.standBy.port=11211
+
+#RabbitMq Configuration
+rabbitmq.address=rmq01
+rabbitmq.port=5672
+rabbitmq.username=test
+rabbitmq.password=test
+
+#Elasticesearch Configuration
+elasticsearch.host =192.168.1.85
+elasticsearch.port =9300
+elasticsearch.cluster=vprofile
+elasticsearch.node=vprofilenode
+
+```
+
+Build the code, this will create war file in target directory 
+
+```
+mvn install 
+```
+
+Deploy the artifact 
+
+```
+
+sudo systemctl stop tomcat
+sleep 120
+sudo rm -rf /usr/local/tomcat8/webapps/ROOT*
+sudo cp target/vprofile-v2.war /usr/local/tomcat8/webapps/ROOT.war 
+sudo systemctl start tomcat
+sleep 300
+```
+
+Change ownership of war file and restart the tomcat service
+
+```
+sudo chown tomcat.tomcat usr/local/tomcat8/webapps -R 
+sudo systemctl restart tomcat
+```
