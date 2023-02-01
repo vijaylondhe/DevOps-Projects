@@ -289,7 +289,7 @@ wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8
 tar xzvf apache-tomcat-8.5.37.tar.gz
 ```
 
-Create Tomcat user 
+Create Tomcat user and its set home directory and shell 
 
 ```
 useradd --home-dir /usr/local/tomcat8 --shell /sbin/nologin tomcat
