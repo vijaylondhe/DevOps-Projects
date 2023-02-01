@@ -28,6 +28,8 @@ In this project we will setup the Web Application Stack on the local machine usi
 
 ![GitHub Light](./snaps/web-app-stack-local.png)
 
+User from the browser will access the nginx service, nginx service then forward request to the apache tomcat server, which then forward request to message broker (RabbitMQ), and rabbitmq will forward request to the memcached and finally to the mysql server.
+
 ## Step 1: Setup Virtual Machines
 
 
@@ -389,3 +391,50 @@ Change ownership of war file and restart the tomcat service
 sudo chown tomcat.tomcat usr/local/tomcat8/webapps -R 
 sudo systemctl restart tomcat
 ```
+
+
+### Setup VM for NGINX
+
+Login to Nginx virtual machine and install the nginx package 
+
+```
+vagrant ssh web01 
+sudo apt update 
+sudo apt upgrade 
+sudo apt install nginx -y 
+```
+
+Create Nginx configuration file 
+
+```
+sudo vim /etc/nginx/sites-available/vproapp
+
+upstream vproapp {
+    server app01:8080;
+}
+server {
+    listen 80;
+    location / {
+        proxy_pass http://vproapp;
+    }
+}
+```
+
+Remove the default nginx configuration
+
+```
+rm -rf /etc/nginx/sites-enabled/default
+```
+
+Create link to activate the website 
+
+```
+ln -s /etc/nginx/sites-available/vproapp /etc/nginx/sites-enabeld/vproapp
+```
+
+Restart the nginx service 
+
+```
+sudo systemctl restart nginx
+```
+
