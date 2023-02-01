@@ -245,3 +245,81 @@ sudo systemctl restart rabbitmq-server
 sudo reboot
 ```
 
+
+### Setup VM for Apache Tomcat
+
+Login to app01 virtual machine and install latest packages
+
+```
+vagrant ssh app01
+sudo yum update -y 
+```
+
+Install JDK,GIT and MAVEN packages
+
+```
+sudo yum install java-1.8.0-openjdk -y
+sudo yum install git maven wget -y
+```
+
+Download Apache Tomcat Package
+
+```
+cd /tmp
+wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz
+tar xzvf apache-tomcat-8.5.37.tar.gz
+```
+
+Create Tomcat user 
+
+```
+useradd --home-dir /usr/local/tomcat8 --shell /sbin/nologin tomcat
+```
+
+Copy Tomcat directory from /tmp to /usr/local/tomcat8/ and set the permission to tomcat user
+
+```
+sudo cp -r /tmp/apache-tomcat-8.5.37/* /usr/local/tomcat8/
+sudo chown -R tomcat.tomcat /usr/local/tomcat8
+```
+
+Setup Systemd for the tomcat
+
+```
+vi /etc/systemd/system/tomcat.service
+[Unit] 
+Description=Tomcat After=network.target
+
+[Service]
+User=tomcat
+WorkingDirectory=/usr/local/tomcat8 Environment=JRE_HOME=/usr/lib/jvm/jre Environment=JAVA_HOME=/usr/lib/jvm/jre Environment=CATALINA_HOME=/usr/local/tomcat8 Environment=CATALINE_BASE=/usr/local/tomcat8 
+ExecStart=/usr/local/tomcat8/bin/catalina.sh run 
+ExecStop=/usr/local/tomcat8/bin/shutdown.sh 
+SyslogIdentifier=tomcat-%i
+
+[Install] 
+WantedBy=multi-user.target
+```
+
+Setup firewall for tomcat port and restart the service 
+
+```
+sudo systemctl daemon-reload
+sudo firewall-cmd --add-port=8080/tcp --permanent 
+sudo firewall-cmd --reload
+sudo systemctl start tomcat
+sudo systemctl enable tomcat
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent 
+sudo firewall-cmd --reload
+```
+
+Setup JAVA path for maven
+
+```
+sudo echo 'JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' > /etc/java/maven.conf 
+sudo yum install java-1.8.0-openjdk-devel -y
+```
+
