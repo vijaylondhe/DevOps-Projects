@@ -18,9 +18,7 @@ In this project we will setup the Web Application Stack on the local machine usi
 - Oracle Virtual Box (for Windows)/ VMware Fusion Tech (for MacOS)
 - Vagrant (for VM automation)
 - Vagrant Plugin (vagrant-hostmanager/vagrant-vbguest/vagrant-vmware-desktop) 
-- Git
-- JDK8
-- Maven 
+- Git 
 - IDE (VSCode)
 
 
