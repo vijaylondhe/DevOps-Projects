@@ -253,7 +253,7 @@ sudo rabbitmqctl add_user test test
 sudo rabbitmqctl set_user_tags test administrator
 ```
 
-Configure firewall for rabbitmq-server port 
+Configure firewall for rabbitmq-server ports 
 
 ```
 sudo firewall-cmd --add-port=5671/tcp --permanent 
