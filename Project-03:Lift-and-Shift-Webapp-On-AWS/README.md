@@ -12,3 +12,17 @@ Following AWS services will be used
 - IAM
 - ACM
 - S3 
+
+Flow of execution:
+
+- Login to the AWS account.
+- Create key pair to access the instances.
+- Create Security groups, so that only required ports will be opened on the instances. 
+- Launch the EC2 instances with userdata.
+- Update the IP addresses in Route53. 
+- Build the application from the source code.
+- Upload the artifact to S3 storage.
+- Download the artifact from S3 to EC2 tomcat instance.
+- Setup the ELB with HTTPS (Use ACM for SSL certifiacte).
+- Map the ELB endpoint url to website name in DNS provider (e.g. GoDaddy).
+- Verify the application. 
