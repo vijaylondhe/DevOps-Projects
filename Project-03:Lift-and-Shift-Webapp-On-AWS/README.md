@@ -13,7 +13,7 @@ Following AWS services will be used
 - ACM
 - S3 
 
-Flow of execution:
+### Flow of execution:
 
 - Login to the AWS account.
 - Create key pair to access the instances.
