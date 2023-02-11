@@ -30,7 +30,7 @@ Following AWS services will be used
 
 ## Architecture 
 
-![GitHub Light](./snaps/lift_and_shift_architecture1.jpg)
+![GitHub Light](./snaps/architecture.jpg)
 
 
 ### Create Certificate in AWS Certificate Manager (ACM)
