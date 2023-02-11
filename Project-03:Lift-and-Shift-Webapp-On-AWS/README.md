@@ -13,7 +13,7 @@ Following AWS services will be used
 - ACM
 - S3 
 
-### Flow of execution:
+## Flow of execution:
 
 - Login to the AWS account.
 - Create key pair to access the instances.
@@ -26,3 +26,8 @@ Following AWS services will be used
 - Setup the ELB with HTTPS (Use ACM for SSL certifiacte).
 - Map the ELB endpoint url to website name in DNS provider (e.g. GoDaddy).
 - Verify the application. 
+
+
+## Architecture 
+
+![GitHub Light](./snaps/lift_and_shift_to_aws.jpg)
