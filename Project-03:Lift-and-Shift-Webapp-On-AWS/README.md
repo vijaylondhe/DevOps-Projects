@@ -230,12 +230,14 @@ sudo apt install tomcat8 tomcat8-admin tomcat8-docs tomcat8-common git -y
 - Create A records for all backend services 
 
 ```
-db01.vprofile.in    172.31.19.22
-mc01.vprofile.in    172.31.31.190
-rmq01.vprofile.in   172.31.24.225
+db01.vprofile.in    172.31.6.8
+mc01.vprofile.in    172.31.0.131
+rmq01.vprofile.in   172.31.0.214
 ```
 
 ### Build and Deploy the Artifact
+
+- Perform this steps on the local machine 
 
 - Install JDK, MAVEN and AWS-CLI on the local machine 
 
@@ -320,7 +322,7 @@ aws s3 ls s3://vprofile-artifact-store-815
 ```
 ssh -i vprofile-key ec2-user@52.134.25.110
 sudo -i
-yum install aws-cli -y
+apt install awscli -y 
 ```
 
 - Copy the artifact from the s3 to /tmp folder
@@ -338,38 +340,176 @@ cp /tmp/vprofile-v2.war /var/lib/tomcat8/webapps/ROOT.war
 - Open the file /var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/application.properties and check the hostname for MySQL, Memcached, and RabbitMQ services are as per A records configured in Route53.
 
 
-### Create Target group and Application Load Balancer
+### Create Target group 
 
-- In EC2 service, select the Target Group 
+- In EC2 service, under Load Balancing select the Target Group 
 
-- Create the new Target Group 
+- Click on Create the Target Group 
+
+- In Basic Configuration, select Instances as target type 
+
+- Target Group Name: vprofile-TG
+
+- Protocol: HTTP Port: 8080
+
+- Select VPC: default 
+
+- Protocol Version: HTTP1
+
+- Health Checks: HTTP 
+
+- Health Check Path: /login
+
+- Adavanced Health Check Setting: Port: Override 8080
+
+- Healty Thershold: 3 
+
+- Click on Next
+
+- Register Targets: Select the Apache Tomcat Instance
+
+- Make Sure Port is 8080 for selected target
+
+- Click on Include as pending below
+
+- Click on Create Target Group 
 
 
-### Update the Load Balancer endpoint in GoDaddy
+
+### Create Application Load Balancer and Attach Target Group
+
+- In EC2 service, under the Load Balancing menu, click on Load Balancers
+
+- Select Create Load Balancer
+
+- Choose Application Load Balancer
+
+- Load Balancer Name: vprofile-ALB
+
+- Scheme: Internet Facing 
+
+- IP Address Type: IPv4
+
+- Network Mapping: Select default VPC and select all AZ's subnet 
+
+- Security Group: SG_ALB
+
+- Listeners and Routing: configure both HTTP and HTTPS 
+
+- Protocol: HTTP  Port: 80 Forward-To: vprofile-TG 
+
+- Protocol: HTTPS  Port: 443 Forward-To: vprofile-TG 
+
+- In Secure Listener Settings: Select Default SSL/TLS Certificate: *.cloudndevops.in
+
+- Check the summary
+
+- Click on Create Load Balancer
+
+
+
+### Update the Load Balancer endpoint in DNS Provider (GoDaddy)
+
+- In GoDaddy, create the CNAME record
+
+- Host: vprofileapp  Points-to: vprofile-ALB-1761899768.us-east-1.elb.amazonaws.com 
+
 
 ### Verify the application
 
-### Setup the AutoScaling Group for Apache Tomcat
+- In browser enter the URL
 
-Create AMI of apache tomcat instance AMI Name: 
+```
+https://vprofileapp.cloudndevops.in
+```
 
-Create Launch Configuration 
-
-    Name
-    AMI
-    Instance Type 
-    Security Group
-    IAM Role 
+- Enter the username: admin_vp and Password: admin_vp
 
 
-Create Auto Scaling Group 
-    
-    Name
-    Launch Configuration
-    VPC
-    Subnets
-    Enable Load Balancing 
-    Select Target Group
-    Select Health Check on Laod Balancer 
-    Capacity
-    Target Tracking Policy CPU utilization 50%
+
+### Create Launch Configuration 
+
+- Create AMI of apache tomcat instance 
+
+- Select vprofile-app01 instance 
+
+- Click on Actions -> Image and templates -> Create Image
+
+- Image Name: vprofile-app01-image
+
+- Click on Create Image
+
+- In EC2 Service, under the Auto Scaling option click on Launch Configuration 
+
+- Click on Create Launch Configuration 
+
+- Launch Configuration Name: vprofile-launch-configuration
+
+- AMI: vprofile-app01-image
+
+- Instance Type: t2.micro
+
+- IAM Instance Profile: vprofile-artifact-store-role (Create IAM role with S3FullAccess)
+
+- Security Group: SG_Apache_Tomcat
+
+- Key Pair: vprofile-key 
+
+- Click on Create Launch Configuration 
+
+
+### Create AutoScaling Group 
+
+- Click on Auto Scaling Group
+
+- Auto Scaling group name: vprofile-ASG
+
+- Switch to launch configuration
+
+- Launch configuration: vprofile-launch-configuration
+
+- Click Next
+
+- VPC: Select default VPC
+
+- Availability Zones and subnets: Select All
+
+- Click Next
+
+- Load Balancing: Attach to Existing Load Balancer
+
+- Choose from your load balancer target groups
+
+- Existing load balancer target groups: vprofile-TG
+
+- Health Check: ELB
+
+- Configure group size and scaling policies
+
+- Group size: Desired: 2 Minimum: 1 Maximum: 2
+
+- Scaling Policies: Target tracking scaling policy
+
+- Metric Type: Average CPU Utilization 
+
+- Target Value: 50
+
+- Click Next
+
+- Add Notification: Create Topic and add reciepent email address
+
+- Click Next
+
+- Review Summary and click on Create Autoscaling Group 
+
+
+### Verify the application
+
+In browser type the URL
+
+```
+http://vprofileapp.cloudndevops.in
+```
+
+
+Congratulations!!! We have successfully deployed Web Application stack on AWS.
