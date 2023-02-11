@@ -317,7 +317,7 @@ aws s3 ls s3://vprofile-artifact-store-815
 
 - Make Sure to add S3FullAccess policy in the role.
 
-- Login to Apache Tomcat instance, and Install the aws-cli package 
+- Login to Apache Tomcat instance, and Install the aws-cli package (Make sure to open 22 port in SG_Apache_Tomcat security group)
 
 ```
 ssh -i vprofile-key ec2-user@52.134.25.110
