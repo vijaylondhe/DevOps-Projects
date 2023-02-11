@@ -35,7 +35,7 @@ Following AWS services will be used
 
 ### Create Certificate in AWS Certificate Manager (ACM)
 
-- Login to the AWS account 
+- Login to the AWS account and select N.Virginia as region
 
 ![GitHub Light](./snaps/Login.png)
 
@@ -58,3 +58,37 @@ Following AWS services will be used
 - After some time you will see the certifiacte status as "Issued"
 
 ![GitHub Light](./snaps/Issued_status.png)
+
+
+### Create Key Pair 
+
+Select N.virgina as region
+
+Go to EC2 service and under the Network and Security select the Key Pairs 
+
+Provide name to keypair e.g. vprofile-key select .pem as private key file format
+
+
+### Create Security Groups
+
+- Create Security group for Application load balancer 
+
+In inbound rules add 80 and 443 port for all internet access, so that our application will be accessed from the internet.
+
+![GitHub Light](./snaps/SG_ALB.png)
+
+- Create Security group for Apache tomcat instance 
+
+In inbound rules add port 8080 and allow access from security group of ALB.
+
+![GitHub Light](./snaps/SG_Apache_tomcat.png)
+
+- Create Security group for backend services (RabbitMQ, Memcached, MySQL)
+
+In inbound rules add port 3306 (MySQL), 11211 (Memcached), 5672 (RabbitMQ) and allow access to security group of Apache Tomcat only.
+
+Also add one inbound rule with ALL traffic with self Security Group ID (This will allow all backend services to communicate with each other). 
+
+![GitHub Light](./snaps/SG_Backend_Services.png)
+
+
