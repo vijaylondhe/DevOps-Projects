@@ -374,6 +374,7 @@ cp /tmp/vprofile-v2.war /var/lib/tomcat8/webapps/ROOT.war
 
 - Click on Create Target Group 
 
+![GitHub Light](./snaps/tagert_group.png)
 
 
 ### Create Application Load Balancer and Attach Target Group
@@ -406,6 +407,9 @@ cp /tmp/vprofile-v2.war /var/lib/tomcat8/webapps/ROOT.war
 
 - Click on Create Load Balancer
 
+![GitHub Light](./snaps/lb_summary.png)
+
+![GitHub Light](./snaps/lb_active.png)
 
 
 ### Update the Load Balancer endpoint in DNS Provider (GoDaddy)
@@ -457,6 +461,7 @@ https://vprofileapp.cloudndevops.in
 
 - Click on Create Launch Configuration 
 
+![GitHub Light](./snaps/launch_configuration.png)
 
 ### Create AutoScaling Group 
 
@@ -503,6 +508,8 @@ https://vprofileapp.cloudndevops.in
 - Review Summary and click on Create Autoscaling Group 
 
 
+![GitHub Light](./snaps/asg.png)
+
 ### Verify the application
 
 In browser type the URL
@@ -511,5 +518,6 @@ In browser type the URL
 http://vprofileapp.cloudndevops.in
 ```
 
+![GitHub Light](./snaps/url.png)
 
 Congratulations!!! We have successfully deployed Web Application stack on AWS.
