@@ -31,3 +31,30 @@ Following AWS services will be used
 ## Architecture 
 
 ![GitHub Light](./snaps/lift_and_shift_to_aws.jpg)
+
+
+### Create Certificate in AWS Certificate Manager (ACM)
+
+- Login to the AWS account 
+
+![GitHub Light](./snaps/Login.png)
+
+- Go to Certificate Manager service and click on Request a Certificate 
+
+![GitHub Light](./snaps/ACM_service.png)
+
+- Select certificate type as public certificate and click next
+
+![GitHub Light](./snaps/Request_cert.png)
+
+- Enter the domain name and DNS validation method as show in below and click on Request 
+
+![GitHub Light](./snaps/domain_name_validation)
+
+- You will see Certificate ID and the status as "pending"
+
+- Click on Certificate ID copy the CNAME name and CNAME value and create CNAME record in your DNS provider (e.g. GoDaddy)
+
+- After some time you will see the certifiacte status as "Issued"
+
+![GitHub Light](./snaps/Issued_status.png)
