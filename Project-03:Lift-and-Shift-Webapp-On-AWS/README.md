@@ -18,7 +18,7 @@ Following AWS services will be used
 - Login to the AWS account.
 - Create key pair to access the instances.
 - Create Security groups, so that only required ports will be opened on the instances. 
-- Launch the EC2 instances with userdata.
+- Launch the EC2 instances (for Apache Tomcat, Memcached, RabbitMQ and MySQL) with userdata.
 - Update the IP addresses in Route53. 
 - Build the application from the source code.
 - Upload the artifact to S3 storage.
@@ -91,4 +91,66 @@ Also add one inbound rule with ALL traffic with self Security Group ID (This wil
 
 ![GitHub Light](./snaps/SG_Backend_Services.png)
 
+
+### Create EC2 instance for MySQL 
+
+- AMI: CentOS 7
+- Instance Type: t2.micro
+- VPC: Default
+- Security Group: SG_Backend_Services
+- Key Pair: vprofile-key
+- Tag: "Name": "vprofile-db01",  "Project": "vprofile"
+- User Data: 
+
+```
+#!/bin/bash
+DATABASE_PASS='admin123'
+sudo yum update -y
+sudo amazon-linux-extras install epel -y
+#sudo yum install epel-release -y
+sudo yum install git zip unzip -y
+sudo yum install mariadb-server -y
+
+
+# starting & enabling mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+cd /tmp/
+git clone https://github.com/vijaylondhe/vprofile-project.git
+#restore the dump file for the application
+sudo mysqladmin -u root password "$DATABASE_PASS"
+sudo mysql -u root -p"$DATABASE_PASS" -e "UPDATE mysql.user SET Password=PASSWORD('$DATABASE_PASS') WHERE User='root'"
+sudo mysql -u root -p"$DATABASE_PASS" -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+sudo mysql -u root -p"$DATABASE_PASS" -e "DELETE FROM mysql.user WHERE User=''"
+sudo mysql -u root -p"$DATABASE_PASS" -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%'"
+sudo mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
+sudo mysql -u root -p"$DATABASE_PASS" -e "create database accounts"
+sudo mysql -u root -p"$DATABASE_PASS" -e "grant all privileges on accounts.* TO 'admin'@'localhost' identified by 'admin123'"
+sudo mysql -u root -p"$DATABASE_PASS" -e "grant all privileges on accounts.* TO 'admin'@'%' identified by 'admin123'"
+sudo mysql -u root -p"$DATABASE_PASS" accounts < /tmp/vprofile-project/src/main/resources/db_backup.sql
+sudo mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
+
+# Restart mariadb-server
+sudo systemctl restart mariadb
+
+
+#starting the firewall and allowing the mariadb to access from port no. 3306
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent
+sudo firewall-cmd --reload
+sudo systemctl restart mariadb
+
+```
+
+### Create EC2 instance for Memcached
+
+### Create EC2 instance for RabbitMQ
+
+### Create EC2 instance for Apache Tomcat
+
+### Setup Route53 Private Hosted Zone
+
+### Build and Deploy the Artifact
 
