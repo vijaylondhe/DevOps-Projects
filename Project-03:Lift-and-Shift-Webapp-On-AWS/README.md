@@ -30,7 +30,7 @@ Following AWS services will be used
 
 ## Architecture 
 
-![GitHub Light](./snaps/lift_and_shift_to_aws.jpg)
+![GitHub Light](./snaps/lift_and_shift_architecture.jpg)
 
 
 ### Create Certificate in AWS Certificate Manager (ACM)
@@ -154,3 +154,60 @@ sudo systemctl restart mariadb
 
 ### Build and Deploy the Artifact
 
+install jdk maven aws-cli on local machine 
+
+clone the project 
+
+Change the hostnames in application.properties file
+
+generate the war file 
+
+create iam user in aws with programatic access and s3fullaccess permissiom
+
+create s3 bucket
+
+cp war file to s3 bucket 
+
+create iam role which will give access to s3 and attach to apache tomcat instance
+
+Login to apache tomcat instance, install the aws-cli package 
+
+Copy the artifact from the s3 to /tmp folder
+
+Copy the artifact from /tmp to /var/lib/tomcat8/webapps/ as ROOT.war
+
+Open the file /var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/application.properties
+
+Check the hostname for MySQL, Memcached, and RabbitMQ services
+
+
+### Create Target group and Application Load Balancer
+
+### Update the Load Balancer endpoint in GoDaddy
+
+### Verify the application
+
+### Setup the AutoScaling Group for Apache Tomcat
+
+Create AMI of apache tomcat instance AMI Name: 
+
+Create Launch Configuration 
+
+    Name
+    AMI
+    Instance Type 
+    Security Group
+    IAM Role 
+
+
+Create Auto Scaling Group 
+    
+    Name
+    Launch Configuration
+    VPC
+    Subnets
+    Enable Load Balancing 
+    Select Target Group
+    Select Health Check on Laod Balancer 
+    Capacity
+    Target Tracking Policy CPU utilization 50%
