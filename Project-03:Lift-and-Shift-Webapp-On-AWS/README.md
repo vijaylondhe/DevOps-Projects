@@ -49,7 +49,7 @@ Following AWS services will be used
 
 - Enter the domain name and DNS validation method as show in below and click on Request 
 
-![GitHub Light](./snaps/domain_name_validation)
+![GitHub Light](./snaps/domain_name_validation.png)
 
 - You will see Certificate ID and the status as "pending"
 
