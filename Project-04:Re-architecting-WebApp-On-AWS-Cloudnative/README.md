@@ -74,7 +74,78 @@ Following AWS services will be used:
   - Description: DB subnet group for vprofile MySQL RDS instance
   - VPC: Default
   - Add Subnets: Select all the availability zones and all the subnets in the az.
-  - Create
+  - Click on Create
 
 - Create Parameter Group:
-  - 
+  - Parameter Group Details
+  - Parameter Group Family: mysql5.7
+  - Type: DB Parameter Group
+  - Group Name: vprofile-rds-parameter-group
+  - Description: parameter group for MySQL RDS instance
+  - Click on Create
+  - Note: This parameter group created with default parameters, you can edit the required parameters. 
+
+- Now, we have security group, DB subnet group and parameter group, so lets create RDS instance.
+
+- Create RDS Instance: 
+  - Click on Databases, create database
+  - Database creation method: Standard Create 
+  - Engine Type: MySQL 
+  - Version: MySQL 5.7.22
+  - Templates: Dev/Test
+  - DB Instance Identifier: vprofile-rds-mysql
+  - Master username: Admin
+  - Password: Auto generated 
+  - DB Instance Class: Burstable Classes (db.t3.micro)
+  - Storage: gp2 20GB
+  - Availability & Durability: Do not create stand by instance 
+  - VPC: default
+  - Subnet Group: vprofile-rds-subnet-group
+  - Public Access: No
+  - Security Group: vprofile-backend-sg
+  - Database Port: 3306 
+  - Database Authentication: Password Authentication
+  - Additional Configuration
+  - Initial Database Name: accounts
+  - DB Parameter Group: vprofile-rds-parameter-group
+  - Enable Automatic Backup: Yes (Backup Retention: 7 days)
+  - Backup Window: No Preference
+  - Monitoring: Disable Enhanced Monitoring
+  - Enable delete protection 
+  - Click on Create Database
+  - Click on View Credential Detail (Copy this credential in text file, to use it later in application.properties file)
+
+
+### Create ElastiCache
+
+- Create Parameter Group:
+  - Name: vprofile-memcached-parameter-group
+  - Description: vprofile-memcached-parameter-group
+  - Family: Memcached1.4
+  - Click on Create 
+
+- Create Subnet Group:
+  - Click on Create Subnet Group 
+  - Name: vprofile-memcached-subnet-group
+  - Description: vprofile-memcached-subnet-group
+  - VPC: default
+  - Select all the subnet in all availability zones 
+  - Click on Create 
+
+- Create Cluster:
+  - Click on Get Started 
+  - Create Cluster -> Create Memcached Cluster
+  - Location: AWS Cloud
+  - Name: vprofile-elasticache-service 
+  - Description: vprofile-elasticache-service 
+  - Engine Version: 1.4.5
+  - Port: 11211
+  - Parameter Groups: vprofile-memcached-parameter-group
+  - Node Type: cache.t2.micro
+  - Number of Nodes: 1 
+  - Subnet Group Setting: vprofile-memcached-subnet-group
+  - Availability Zone: No Prefernce
+  - Security Group: vprofile-backend-sg
+  - Tags: Name: vprofile-elasticache-service 
+  - Click on Create 
+  
