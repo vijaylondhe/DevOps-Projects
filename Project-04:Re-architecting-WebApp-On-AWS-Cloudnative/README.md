@@ -239,3 +239,5 @@ show tables;
 - Monitoring:
   - System: Enhanced
 - Tags: Project -> vprofile
+- Click on Create App
+
