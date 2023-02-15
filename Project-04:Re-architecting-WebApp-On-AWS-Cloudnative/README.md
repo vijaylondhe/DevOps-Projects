@@ -41,3 +41,27 @@ Following AWS services will be used:
 ## Architecture 
 
 ![GitHub Light](./snaps/cloud_native_app_aws.jpg)
+
+
+## Steps:
+
+### Create Key Pair 
+
+- Create key pair to login to Elastic Beanstalk Instance. 
+- Key Name: vprofile-bean-key
+- Key Format: .pem 
+- Region: N. Virginia
+
+
+### Create Security Group for Backend Services
+
+- Security Group Name: vprofile-backend-sg
+- Description: Security Group for backend services 
+- Inbound Rules: Custom TCP 22 Port Allow from MyIP (This is dummy rule )
+- Save the Rules.
+- Edit the Security Group again
+- Add Inbound Rule: Allow all traffic for the same security group id
+- Note: This will allow all backend services to communicate with each other
+- Also delete the port 22 added earlier 
+- Save the Rules
+
