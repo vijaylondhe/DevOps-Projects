@@ -40,4 +40,4 @@ Following AWS services will be used:
 
 ## Architecture 
 
-![GitHub Light](./snaps/cloud_native_architecture.jpg)
+![GitHub Light](./snaps/cloud_native_application.jpg)
