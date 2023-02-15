@@ -206,3 +206,36 @@ mysql -h <rds_endpoint> -u admin -p<rds_password>
 show databases;
 show tables;
 ```
+
+
+### Create Elastic Beanstalk
+
+- Go to Elastic beanstalk service
+- Click on Create Application
+- Application Name: vprofile-java-app
+- Tags: Project -> vprofile
+- Platform: Tomcat 
+- Platform Branch: Tomcat 8 with Correto 11 running on 64 bit Amazon Linux 2
+- Platform Version: 4.2.16
+- Application Code: Sample Application 
+- Click on Configure more options 
+- Presets: Custom Configuration
+- Instances: 
+  - Security group: vprofile-backend-sg
+  - Root Volume: Container default 
+- Capcity: 
+  - Auto Scaling Group: Load Balanced 
+  - Instances: Min. 2, Max. 4 
+  - Instance Types: t2.micro
+  - Availability Zone: Any 
+  - Scaling Triggers: Metric -> Network Out (Keep default setting)
+- Load Balancer (will do this later)
+- Rolling Updates & Deployments
+  - Deployment Policy: Rolling
+  - Batch Size: 50%
+- Security:
+  - Key Pair: vprofile-bean-key
+  - IAM Instance Profile: Create Instance Profile 
+- Monitoring:
+  - System: Enhanced
+- Tags: Project -> vprofile
