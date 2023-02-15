@@ -116,7 +116,7 @@ Following AWS services will be used:
   - Click on View Credential Detail (Copy this credential in text file, to use it later in application.properties file)
 
 
-### Create ElastiCache
+### Configure ElastiCache 
 
 - Create Parameter Group:
   - Name: vprofile-memcached-parameter-group
@@ -148,4 +148,61 @@ Following AWS services will be used:
   - Security Group: vprofile-backend-sg
   - Tags: Name: vprofile-elasticache-service 
   - Click on Create 
-  
+
+
+### Configrue Amazon MQ
+
+- Go to Amazon MQ service
+- Click on Get Started 
+- Broker Engine Type: RabbitMQ
+- Deployment Mode: Single-instance Broker 
+- Broker Name: vprofile-rmq
+- Broker Instance Type: mq.t3.micro
+- RabbitMQ Access:
+- Username: rabbit
+- Password: *****
+- Broker Engine Version: 3.9.16
+- Network and Security: Access Type -> Private Access
+- VPC and Subnet: Use default VPC and subnets
+- Security Group: vprofile-backend-sg
+- Click on Create
+
+### Initialize the Database
+
+- Lauch new EC2 instance
+- Instance Name: mysql-client
+- AMI: Ubuntu 18.04
+- Instance Type: t2.micro
+- Key Pair: vprofile-bean-key
+- VPC: default
+- Security Group: Create new SG -> Name: mysqlclient-sg Port-> 22 From -> MyIP
+- User Data:
+
+```
+#!/bin/bash
+sudo apt update
+sudo apt install mysql-client -y
+```
+
+- Launch the instance
+- Edit the SG of Backend Service and Add the access for mysql-client instance
+- Port 3306 -> SG (mysqlclient-sg)
+- Get the instance public ip and login into it 
+- Clone the repository
+
+```
+git clone https://github.com/vijaylondhe/vprofile-project.git
+cd vprofile-project/src/main/resources
+mysql -h <rds_endpoint> -u admin -p<rds_password> accounts < db_backup.sql
+```
+
+- Login to mysql database and check db is initialzed or not 
+
+```
+mysql -h <rds_endpoint> -u admin -p<rds_password>
+```
+
+```
+show databases;
+show tables;
+```
