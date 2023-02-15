@@ -57,11 +57,24 @@ Following AWS services will be used:
 
 - Security Group Name: vprofile-backend-sg
 - Description: Security Group for backend services 
-- Inbound Rules: Custom TCP 22 Port Allow from MyIP (This is dummy rule )
+- Inbound Rules: Custom TCP 22 Port Allow from MyIP 
 - Save the Rules.
 - Edit the Security Group again
 - Add Inbound Rule: Allow all traffic for the same security group id
 - Note: This will allow all backend services to communicate with each other
-- Also delete the port 22 added earlier 
+- Also delete rule added for the port 22
 - Save the Rules
 
+### Create RDS MySQL Instance
+
+- Go to RDS service
+
+- Create DB subnet group:
+  - Name: vprofile-rds-subnet-group
+  - Description: DB subnet group for vprofile MySQL RDS instance
+  - VPC: Default
+  - Add Subnets: Select all the availability zones and all the subnets in the az.
+  - Create
+
+- Create Parameter Group:
+  - 
