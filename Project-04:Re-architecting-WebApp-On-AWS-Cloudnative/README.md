@@ -278,7 +278,9 @@ cd vprofile-project
 ```
 cd src/main/resources
 vim application.properties
+```
 
+```
 #JDBC Configutation for Database Connection
 jdbc.driverClassName=com.mysql.jdbc.Driver
 jdbc.url=jdbc:mysql://<rds_endpoint>:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
