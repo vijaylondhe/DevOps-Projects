@@ -14,6 +14,8 @@ Following AWS services will be used:
 
 - Route53
 
+- S3
+
 - CloudFront 
 
 
@@ -240,4 +242,104 @@ show tables;
   - System: Enhanced
 - Tags: Project -> vprofile
 - Click on Create App
+
+
+### Update the Security Group and ELB
+
+- In EC2 service check the instances created by Elastic beanstalk 
+- Check the security group id attached to this instances 
+- Edit the backend services security group i.e vprofile-backend-sg
+- Add the below rules
+  - Custom TCP -> Port 3306  -> Source (SG id of elastic beanstalk instances)
+  - Custom TCP -> Port 11211 -> Source (SG id of elastic beanstalk instances)
+  - Custom TCP -> Port 5671  -> Source (SG id of elsatic beanstalk instances)
+- Save the rule 
+
+- Go to Elastic beanstalk service, click on environments 
+- Select the Configuration -> Load Balancer (Edit)
+- Add one more listenr for Port 443 HTTPS ->  Choose the certificate *.cloudndevops.in
+- Edit the Processes -> Change health check path to /login 
+- In Sessions, enable the stickyness 
+- Click on Apply
+
+
+### Build & Deploy Artifact
+
+- Login to the local machine 
+- Clone the source code 
+
+```
+git clone https://github.com/vijaylondhe/vprofile-project.git
+cd vprofile-project
+```
+
+- Edit the application.properties file and update the backend service endpoints 
+
+```
+cd src/main/resources
+vim application.properties
+
+#JDBC Configutation for Database Connection
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://<rds_endpoint>:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+jdbc.username=admin
+jdbc.password=<rds_password>
+
+#Memcached Configuration For Active and StandBy Host
+#For Active Host
+memcached.active.host=<Elasticache_endpoint_remove_port_number>
+memcached.active.port=11211
+#For StandBy Host
+memcached.standBy.host=127.0.0.2
+memcached.standBy.port=11211
+
+#RabbitMq Configuration
+rabbitmq.address=<rabbit_mq_endpoint_remove_port_number>
+rabbitmq.port=5671
+rabbitmq.username=rabbit
+rabbitmq.password=<password>
+
+#Elasticesearch Configuration
+elasticsearch.host =192.168.1.85
+elasticsearch.port =9300
+elasticsearch.cluster=vprofile
+elasticsearch.node=vprofilenode
+```
+
+- Build the artifact 
+
+```
+cd ../../..
+mvn install
+```
+
+- Check artifact is created inside the /target directory
+
+```
+ls /target
+```
+
+- In Elastic Beanstalk service, go to the environments 
+- Click on Application Versions 
+- Click on Upload 
+- Version label: vprofile-v2.5 
+- Choose file from the /target directory
+- Click on Upload
+- Once it is uploaded, select the version: vprofile-v2.5 
+- Click on Actions -> Deploy -> Select the environment (vprofile-env)
+- In Environment, go to the Events 
+- Check the event you will see, environment update is starting 
+- As we configured rolling update deployment type, so you will the updates will happens in batch-1 and batch-2
+
+- Update the DNS in GoDaddy
+- Add new record
+- Type -> CNAME, Host -> vprofile, Points-to -> EB_endpoint
+- In Elastic beanstalk, in Load Balancer make sure stickyness policy is enabled 
+
+- In Browser, test the application.
+
+```
+https://vprofileapp.cloudndevops.in/login
+```
+
 
