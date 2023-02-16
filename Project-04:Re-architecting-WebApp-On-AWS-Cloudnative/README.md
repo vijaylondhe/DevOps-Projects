@@ -343,3 +343,25 @@ https://vprofileapp.cloudndevops.in/login
 ```
 
 
+### Setup CloudFront
+
+- Go to cloufront service
+- Click on Create a Cloudfront distribution
+- Origin Domain: vprofileapp.cloudndevops.in
+- Protocol: Match viewer
+- Origin Path: keep as it is 
+- Viewer Protocol Policy: HTTP and HTTPS
+- Allowed HTTP Methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE 
+- Alternate domain name: vprofileapp.cloudndevops.in
+- Custom SSL certificate: select certificated from ACM
+- TLS Policy: TLSv1
+- Create distribution
+
+
+### Verify the Application
+
+- In browser type the application url
+
+```
+https://vprofileapp.cloudndevops.in
+```
