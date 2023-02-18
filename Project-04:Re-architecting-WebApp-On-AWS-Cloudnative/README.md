@@ -47,6 +47,19 @@ Following AWS services will be used:
 
 ## Steps:
 
+### Create Certificate in AWS Certificate Manager (ACM)
+
+- Login to the AWS account and select N.Virginia as region
+- Go to Certificate Manager service and click on Request a Certificate 
+- Select certificate type as public certificate and click next
+- Enter the domain name and DNS validation method and click on Request 
+- You will see Certificate ID and the status as "pending"
+- Click on Certificate ID copy the CNAME name and CNAME value and create CNAME record in your DNS provider (e.g. GoDaddy)
+- After some time you will see the certifiacte status as "Issued"
+
+![GitHub Light](./snaps/acm.png)
+
+
 ### Create Key Pair 
 
 - Create key pair to login to Elastic Beanstalk Instance. 
@@ -54,6 +67,7 @@ Following AWS services will be used:
 - Key Format: .pem 
 - Region: N. Virginia
 
+![GitHub Light](./snaps/key_pair.png)
 
 ### Create Security Group for Backend Services
 
@@ -67,6 +81,8 @@ Following AWS services will be used:
 - Also delete rule added for the port 22
 - Save the Rules
 
+![GitHub Light](./snaps/vprofile_backend_sg.png)
+
 ### Create RDS MySQL Instance
 
 - Go to RDS service
@@ -78,6 +94,8 @@ Following AWS services will be used:
   - Add Subnets: Select all the availability zones and all the subnets in the az.
   - Click on Create
 
+![GitHub Light](./snaps/rds_subnet_group.png)
+
 - Create Parameter Group:
   - Parameter Group Details
   - Parameter Group Family: mysql5.7
@@ -86,6 +104,10 @@ Following AWS services will be used:
   - Description: parameter group for MySQL RDS instance
   - Click on Create
   - Note: This parameter group created with default parameters, you can edit the required parameters. 
+
+![GitHub Light](./snaps/rds_parameter_group.png)
+
+![GitHub Light](./snaps/rds_paramter_group_1.png)
 
 - Now, we have security group, DB subnet group and parameter group, so lets create RDS instance.
 
@@ -126,6 +148,9 @@ Following AWS services will be used:
   - Family: Memcached1.4
   - Click on Create 
 
+![GitHub Light](./snaps/memcached_parameter_group.png)
+
+
 - Create Subnet Group:
   - Click on Create Subnet Group 
   - Name: vprofile-memcached-subnet-group
@@ -133,6 +158,8 @@ Following AWS services will be used:
   - VPC: default
   - Select all the subnet in all availability zones 
   - Click on Create 
+
+![GitHub Light](./snaps/memcached_subnet_group.png)
 
 - Create Cluster:
   - Click on Get Started 
@@ -150,6 +177,8 @@ Following AWS services will be used:
   - Security Group: vprofile-backend-sg
   - Tags: Name: vprofile-elasticache-service 
   - Click on Create 
+
+![GitHub Light](./snaps/memcached_cluster.png)
 
 
 ### Configrue Amazon MQ
@@ -214,7 +243,7 @@ show tables;
 
 - Go to Elastic beanstalk service
 - Click on Create Application
-- Application Name: vprofile-java-app
+- Application Name: vprofile-app
 - Tags: Project -> vprofile
 - Platform: Tomcat 
 - Platform Branch: Tomcat 8 with Correto 11 running on 64 bit Amazon Linux 2
@@ -243,6 +272,8 @@ show tables;
 - Tags: Project -> vprofile
 - Click on Create App
 
+![GitHub Light](./snaps/elastic_beanstalk_app.png)
+
 
 ### Update the Security Group and ELB
 
@@ -255,12 +286,16 @@ show tables;
   - Custom TCP -> Port 5671  -> Source (SG id of elsatic beanstalk instances)
 - Save the rule 
 
+![GitHub Light](./snaps/vprofile_backend_sg_updated.png)
+
 - Go to Elastic beanstalk service, click on environments 
 - Select the Configuration -> Load Balancer (Edit)
 - Add one more listenr for Port 443 HTTPS ->  Choose the certificate *.cloudndevops.in
 - Edit the Processes -> Change health check path to /login 
 - In Sessions, enable the stickyness 
 - Click on Apply
+
+
 
 
 ### Build & Deploy Artifact
@@ -333,6 +368,11 @@ ls /target
 - Check the event you will see, environment update is starting 
 - As we configured rolling update deployment type, so you will the updates will happens in batch-1 and batch-2
 
+![GitHub Light](./snaps/eb_application_version.png)
+
+![GitHub Light](./snaps/eb_version_update_event.png)
+
+
 - Update the DNS in GoDaddy
 - Add new record
 - Type -> CNAME, Host -> vprofile, Points-to -> EB_endpoint
@@ -341,7 +381,7 @@ ls /target
 - In Browser, test the application.
 
 ```
-https://vprofileapp.cloudndevops.in/login
+https://vprofile.cloudndevops.in/login
 ```
 
 
@@ -349,15 +389,17 @@ https://vprofileapp.cloudndevops.in/login
 
 - Go to cloufront service
 - Click on Create a Cloudfront distribution
-- Origin Domain: vprofileapp.cloudndevops.in
+- Origin Domain: vprofile.cloudndevops.in
 - Protocol: Match viewer
 - Origin Path: keep as it is 
 - Viewer Protocol Policy: HTTP and HTTPS
 - Allowed HTTP Methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE 
-- Alternate domain name: vprofileapp.cloudndevops.in
+- Alternate domain name: vprofile.cloudndevops.in
 - Custom SSL certificate: select certificated from ACM
 - TLS Policy: TLSv1
 - Create distribution
+
+![GitHub Light](./snaps/cloufront_distribution.png)
 
 
 ### Verify the Application
@@ -365,5 +407,7 @@ https://vprofileapp.cloudndevops.in/login
 - In browser type the application url
 
 ```
-https://vprofileapp.cloudndevops.in
+https://vprofile.cloudndevops.in
 ```
+
+![GitHub Light](./snaps/app_url.png)
