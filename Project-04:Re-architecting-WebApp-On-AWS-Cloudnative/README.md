@@ -6,7 +6,7 @@ Following AWS services will be used:
 
 - Elastic Beanstalk
 
-- RDS/GoDaddy
+- RDS
 
 - Elasticache
 
