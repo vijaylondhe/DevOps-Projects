@@ -1,4 +1,4 @@
-# Project-05: Continous Integration with Jenkins, Sonarqube, Nexus and Slack
+# Project-05: Continuous Integration with Jenkins, Sonarqube, Nexus and Slack
 
 ### Objectives:
 
@@ -13,7 +13,7 @@
 
 ### Tools Used:
 
-- Jenkins: Continous integration server
+- Jenkins: Continuous integration server
 - Git/GitHub: Version control system
 - Maven: To build the code 
 - Checkstyle: To analysis the code
@@ -49,10 +49,11 @@
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro-05-ci-architecture.jpg)
+![GitHub Light](./snaps/pro-05-ci-architecture_updated.jpg)
 
 
 ### Steps:
 
 #### Step 1: Create Key Pair and Security Group:
+
 
