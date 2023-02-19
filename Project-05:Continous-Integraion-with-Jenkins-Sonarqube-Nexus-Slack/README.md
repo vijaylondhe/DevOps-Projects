@@ -50,3 +50,9 @@
 ### Architecture:
 
 ![GitHub Light](./snaps/pro-05-ci-architecture.jpg)
+
+
+### Steps:
+
+#### Create Key Pair and Security Group:
+
