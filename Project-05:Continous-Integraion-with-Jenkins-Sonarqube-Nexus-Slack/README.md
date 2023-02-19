@@ -26,3 +26,8 @@
 ### CI Workflow:
 
 ![GitHub Light](./snaps/ci_workflow_updated.jpg)
+
+
+### Architecture:
+
+![GitHub Light](./snaps/pro-05-ci-architecture.jpg)
