@@ -54,5 +54,5 @@
 
 ### Steps:
 
-#### Create Key Pair and Security Group:
+#### Step 1: Create Key Pair and Security Group:
 
