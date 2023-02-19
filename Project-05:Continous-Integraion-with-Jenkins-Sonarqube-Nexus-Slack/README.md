@@ -23,6 +23,6 @@
 - AWS EC2: Compute resource to host all this tools
 
 
-### Workflow:
+### CI Workflow:
 
 ![GitHub Light](./snaps/ci_workflow_updated.jpg)
