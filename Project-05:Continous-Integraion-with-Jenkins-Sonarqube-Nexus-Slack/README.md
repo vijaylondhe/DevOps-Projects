@@ -21,3 +21,8 @@
 - Sonatype Nexus: To store the artifact and download the dependency for maven 
 - Sonarqube: To analysis the code using sonar scanner and publish the report to dashboard
 - AWS EC2: Compute resource to host all this tools
+
+
+### Workflow:
+
+![GitHub Light](./snaps/ci_workflow.jpg)
