@@ -89,7 +89,7 @@ rm -rf /etc/nginx/sites-available/default
 cat <<EOT> /etc/nginx/sites-available/sonarqube
 server{
     listen      80;
-    server_name sonarqube.groophy.in;
+    server_name sonarqube.cloudndevops.in;
 
     access_log  /var/log/nginx/sonar.access.log;
     error_log   /var/log/nginx/sonar.error.log;

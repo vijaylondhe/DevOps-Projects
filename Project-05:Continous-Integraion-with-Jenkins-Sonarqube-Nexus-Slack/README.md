@@ -100,6 +100,9 @@
   
   - Click on Create Security Group 
 
+![GitHub Light](./snaps/<>.jpg)
+
+
 - Create Security Group for Nexus Instance
   - Security Group Name: nexus-sg
   - Description: Security Group for Nexus Instance
@@ -130,6 +133,9 @@
     ```
   
   - Click on Create Security Group 
+
+![GitHub Light](./snaps/<>.jpg)
+
 
 - Create Security Group for Sonar Instance
   - Security Group Name: sonar-sg
@@ -162,6 +168,9 @@
   
   - Click on Create Security Group 
 
+![GitHub Light](./snaps/<>.jpg)
+
+
 - Modify Security Group of Jenkins Instance
   - Inbound rules:
     - Rule 4
@@ -171,3 +180,36 @@
     Source: Custom (sg id of sonar-sg)
     Description: for ssh access to soanr instance 
     ```
+![GitHub Light](./snaps/<>.jpg)
+
+
+#### Step 2: Create EC2 Instances for Jenkins, Nexus and Sonarqube:
+
+- Create EC2 instance for Jenkins 
+  - Instance Name: JenkinsServer
+  - AMI: Ubuntu 20.04
+  - Instance Type: t3.medium
+  - Key Pair: vprofile-ci-key
+  - VPC: default
+  - Security Groups: jenkins-sg
+  - User Data:
+    ```
+    #!/bin/bash
+    sudo apt update
+    sudo apt install openjdk-11-jdk -y
+    sudo apt install ca-certificates -y 
+    sudo apt install maven git wget unzip -y
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee \
+    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+    https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+    /etc/apt/sources.list.d/jenkins.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install jenkins -y
+    ```
+  - Launch Instance
+
+  
+- Create EC2 instance for Nexus
+
+- Create EC2 instance for Sonarqube 
