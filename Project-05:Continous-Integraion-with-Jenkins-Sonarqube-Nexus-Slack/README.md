@@ -87,7 +87,7 @@
     Type: Custom TCP 
     Port range: 8080
     Source: Anywhere IPv4 (0.0.0.0/0)
-    Description: for jenkins console access 
+    Description: for jenkins console access and for github webhook
     ```
 
     - Rule 3
@@ -96,4 +96,78 @@
     Port range: 8080
     Source: Anywhere IPv6 (::/0)
     Description: for jenkins console access
+    ```
+  
+  - Click on Create Security Group 
+
+- Create Security Group for Nexus Instance
+  - Security Group Name: nexus-sg
+  - Description: Security Group for Nexus Instance
+  - VPC: default 
+  - Inbound rules: 
+    - Rule 1
+    ```
+    Type: Custom TCP 
+    Port range: 22
+    Source: MyIP
+    Description: for ssh access to nexus instance 
+    ```
+
+    - Rule 2
+    ```
+    Type: Custom TCP 
+    Port range: 8081
+    Source: MyIP
+    Description: for nexus console access 
+    ```
+
+    - Rule 3
+    ```
+    Type: Custom TCP 
+    Port range: 8081
+    Source: Custom (sg id of jenkins-sg)
+    Description: to upload artifact to nexus from jenkins job and download the dependency from nexus
+    ```
+  
+  - Click on Create Security Group 
+
+- Create Security Group for Sonar Instance
+  - Security Group Name: sonar-sg
+  - Description: Security Group for Sonar Instance
+  - VPC: default 
+  - Inbound rules: 
+    - Rule 1
+    ```
+    Type: Custom TCP 
+    Port range: 22
+    Source: MyIP
+    Description: for ssh access to sonar instance 
+    ```
+
+    - Rule 2
+    ```
+    Type: Custom TCP 
+    Port range: 80
+    Source: MyIP
+    Description: for sonar console access 
+    ```
+
+    - Rule 3
+    ```
+    Type: Custom TCP 
+    Port range: 80
+    Source: Custom (sg id of jenkins-sg)
+    Description: to upload test results to sonar from jenkins job 
+    ```
+  
+  - Click on Create Security Group 
+
+- Modify Security Group of Jenkins Instance
+  - Inbound rules:
+    - Rule 4
+    ```
+    Type: Custom TCP 
+    Port range: 8080
+    Source: Custom (sg id of sonar-sg)
+    Description: for ssh access to soanr instance 
     ```
