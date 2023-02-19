@@ -27,6 +27,25 @@
 
 ![GitHub Light](./snaps/ci_workflow_updated.jpg)
 
+### Flow of Execution:
+
+- Login to AWS
+- Create key pair
+- Create Security group for Jenkins, Sonarqube and Nexus
+- Create EC2 instance with user data for Jenkins, Sonarqube and Nexus
+- Post Installation
+  - Jenkins setup and plugins
+  - Nexus setup and repository setup 
+  - Sonarqube login test
+- Git
+  - Create github repository & migrate code 
+  - Integrate github repo with vscode and test it
+- Build job with nexus integration 
+- Setup Github Webhook
+- Sonarqube server integration
+- Nexus artifact upload stage
+- Slack notification
+
 
 ### Architecture:
 
