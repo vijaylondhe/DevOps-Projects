@@ -75,19 +75,25 @@
   - VPC: default 
   - Inbound rules: 
     - Rule 1
-    - Type: Custom TCP 
-    - Port range: 22
-    - Source: MyIP
-    - Description: for ssh access to jenkins 
+    ```
+    Type: Custom TCP 
+    Port range: 22
+    Source: MyIP
+    Description: for ssh access to jenkins 
+    ```
 
     - Rule 2
-    - Type: Custom TCP 
-    - Port range: 8080
-    - Source: Anywhere IPv4 (0.0.0.0/0)
-    - Description: for jenkins console access 
+    ```
+    Type: Custom TCP 
+    Port range: 8080
+    Source: Anywhere IPv4 (0.0.0.0/0)
+    Description: for jenkins console access 
+    ```
 
     - Rule 3
-    - Type: Custom TCP 
-    - Port range: 8080
-    - Source: Anywhere IPv6 (::/0)
-    - Description: for jenkins console access
+    ```
+    Type: Custom TCP 
+    Port range: 8080
+    Source: Anywhere IPv6 (::/0)
+    Description: for jenkins console access
+    ```
