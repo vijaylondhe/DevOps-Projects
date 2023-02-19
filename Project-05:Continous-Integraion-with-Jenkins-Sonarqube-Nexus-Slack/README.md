@@ -400,3 +400,124 @@
 - Check the Jenkins service is running or not 
 - Switch to the root user `sudo -i`
 - Run the command `systemctl status jenkins`
+- Open the browser and type `http://<public_ip_address_of_jenkins>:8080`
+
+- Get the initial password for the jenkins from `/var/lib/jenkins/secrets/initialAdminPassword`
+- Click on Install suggested plugins
+- Setup the Admin username, full name and E-mail id 
+- Set Jenkins URL -> Save and Finish
+- Login to the Jenkins UI 
+- Install the required plugin for our CI pipeline
+- Go to the Manage Jenkins -> Manage Plugins -> Click on Available
+
+```
+Plugin required 
+1. Maven Integration: To build the source code using maven
+2. GitHub Integration: To integrate our code with jenkins 
+3. Nexus Artifact Uploader: To upload artifact to nexus server
+4. Sonarqube Scanner: To static code analysis
+5. Slack Notification: To send the notification to developer
+6. Build Timestamp: To version the artifact
+
+```
+
+- Click on install without restart
+- Once plugins installation is complete go back to Dashboard
+
+
+
+
+- Login to the Nexus instance
+- `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_nexus>`
+- Switch to the root user `sudo -i`
+- Check the Nexus service is running or not 
+- Run the command `systemctl status nexus`
+- Open the browser and type `http://<public_ip_address_of_nexus>:8081`
+- Click on Sign in 
+- Get the initial password from the file `/opt/nexus/sonatype-work/nexus3/admin.password`
+- Login and give the new password
+- Click on Disable anonymous access -> Next -> Finish
+
+- Create 4 different repositories
+- Click on Settings -> Repository -> Repositories  Create Repository
+
+- Create Repository -> `maven2 (hosted)`
+- Name: `vprofile-release` => This will store our artifact
+- Version Policy -> `release`
+- Click on Create Repository
+
+- Create Repository -> `maven2 (proxy)`
+- Name: `vpro-maven-central` => This will store maven dependencies
+- Proxy -> Remote Storage -> `https://repo1.maven.org/maven2/`
+- Click on Create Repository
+
+- Create Repository -> `maven2 (hosted)`
+- Name: `vprofile-snapshot` => This will store snapshot artifact
+- Version Policy -> `snapshot`
+- Click on Create Repository
+
+- Create Repository -> `maven2 (group)`
+- Name: `vpro-maven-group` => This will use to group all above 3 repositories
+- Version Policy -> `release`
+- In Group section add above 3 repositories in Member repositories (`vprofile-release`, `vpro-maven-central`, `vprofile-snapshot`) 
+- Click on Create Repository
+
+
+
+- Login to the Sonarqube instance
+- `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_sonarqube>`
+- Switch to the root user `sudo -i`
+- Check the Sonarqube service is running or not 
+- Run the command `systemctl status sonar`
+- Open the browser and type `http://<public_ip_address_of_sonarqube>`
+- Click on Login
+- Username: `admin`, Password: `admin`
+
+
+#### Step 4: Create Repository in GitHub:
+
+- Login to github 
+- Create private repository to store the source code and other required files for pipeline
+- Repository Name: `vprociproject`
+- Click on Create Repository
+
+![GitHub Light](./snaps/create_repo_github.png)
+
+
+- Setup the SSH authentication between your local machine and github account
+- On local machine run -> `ssh-keygen`
+- This will create private and public key i.e (`id_rsa` and `id_rsa.pub`)
+- Copy public key
+- Go to github settings -> SSH and GPG key -> New SSH key
+- Title: `mylaptopkey`
+- Key: `paste the public key`
+- Click on Add SSH key 
+- Test the connection from local machine `ssh -T git@github.com`
+
+
+- On the local machine execute below commands
+```
+mkdir vprociproject
+cd vprociproject
+git init
+touch README.md 
+git add . 
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/vijaylondhe/vprociproject.git
+git push -u origin main
+```
+
+- Download the `src`, `userdata`, `Jenkinsfile`, `pom.xml`, `settings.xml` from this project repository and paste in current directory `vprociproject`
+
+```
+git status
+git add . 
+git commit -m "added source code"
+git push -u origin main 
+```
+
+- Please refer repository `https://github.com/vijaylondhe/vprociproject.git`
+
+
+
