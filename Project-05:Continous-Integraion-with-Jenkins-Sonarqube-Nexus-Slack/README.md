@@ -391,3 +391,12 @@
     reboot
     ```
   - Launch Instance
+
+
+#### Step 3: Post Installation Tasks:
+
+- Login to the Jenkins instance
+- `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
+- Check the Jenkins service is running or not 
+- Switch to the root user `sudo -i`
+- Run the command `systemctl status jenkins`
