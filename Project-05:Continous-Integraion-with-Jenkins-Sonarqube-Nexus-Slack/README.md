@@ -185,7 +185,7 @@
 
 #### Step 2: Create EC2 Instances for Jenkins, Nexus and Sonarqube:
 
-- Create EC2 instance for Jenkins 
+- Create EC2 instance for `Jenkins` 
   - Instance Name: JenkinsServer
   - AMI: Ubuntu 20.04
   - Instance Type: t3.medium
@@ -211,7 +211,7 @@
   - Launch Instance
 
 
-- Create EC2 instance for Nexus
+- Create EC2 instance for `Nexus`
   - Instance Name: NexusServer
   - AMI: Amazon Linux 2
   - Instance Type: t3.medium
@@ -260,7 +260,7 @@
   - Launch Instance
 
 
-- Create EC2 instance for Sonarqube 
+- Create EC2 instance for `Sonarqube` 
   - Instance Name: SonarServer
   - AMI: Ubuntu 18.04
   - Instance Type: t3.medium
