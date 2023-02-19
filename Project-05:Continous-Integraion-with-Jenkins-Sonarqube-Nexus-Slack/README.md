@@ -56,4 +56,38 @@
 
 #### Step 1: Create Key Pair and Security Group:
 
+- Login to AWS account
+- Go to the EC2 service
+- Select N. Virginia as region
+- Click on Key Pair
+- Key Name: vprofile-ci-key
+- Key Pair Type: RSA
+- Private key file format: .pem 
+- Click on Create Key Pair
 
+![GitHub Light](./snaps/<>.jpg)
+
+- Go to VPC service
+- Click on Security Groups
+- Create Security Group for Jenkins Instance
+  - Security Group Name: jenkins-sg
+  - Description: Security Group for Jenkins Instance
+  - VPC: default 
+  - Inbound rules: 
+    - Rule 1
+    - Type: Custom TCP 
+    - Port range: 22
+    - Source: MyIP
+    - Description: for ssh access to jenkins 
+
+    - Rule 2
+    - Type: Custom TCP 
+    - Port range: 8080
+    - Source: Anywhere IPv4 (0.0.0.0/0)
+    - Description: for jenkins console access 
+
+    - Rule 3
+    - Type: Custom TCP 
+    - Port range: 8080
+    - Source: Anywhere IPv6 (::/0)
+    - Description: for jenkins console access
