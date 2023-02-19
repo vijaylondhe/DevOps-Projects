@@ -517,7 +517,13 @@ git commit -m "added source code"
 git push -u origin main 
 ```
 
-- Please refer repository `https://github.com/vijaylondhe/vprociproject.git`
+- Create new branch `ci-jenkins`
+- `git checkout -b ci-jenkins`
+- `git branch`
+- Push all the branches to remote repo
+- `git push --all origin`
+- Open the github repo and see the branch has been created with all files and directories
 
+![GitHub Light](./snaps/vprociproject_repo.png)
 
 
