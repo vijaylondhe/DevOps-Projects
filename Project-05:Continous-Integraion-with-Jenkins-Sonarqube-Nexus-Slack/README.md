@@ -25,4 +25,4 @@
 
 ### Workflow:
 
-![GitHub Light](./snaps/ci_workflow.jpg)
+![GitHub Light](./snaps/ci_workflow_updated.jpg)
