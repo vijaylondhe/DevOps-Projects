@@ -537,7 +537,7 @@ git push -u origin main
 - `sudo apt install openjdk-8-jdk -y`
 - `java -version`
 - Get the jdk8 path 
-- 
+
 
 - Login to Jenkins console 
 - Go to Manage Jenkins -> Global Tool Configuration 
