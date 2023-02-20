@@ -54,7 +54,7 @@
 
 ### Steps:
 
-#### Step 1: Create Key Pair and Security Group:
+### Step 1: Create Key Pair and Security Group:
 
 - Login to AWS account
 - Go to the EC2 service
@@ -183,7 +183,7 @@
 ![GitHub Light](./snaps/<>.jpg)
 
 
-#### Step 2: Create EC2 Instances for Jenkins, Nexus and Sonarqube:
+### Step 2: Create EC2 Instances for Jenkins, Nexus and Sonarqube:
 
 - Create EC2 instance for `Jenkins` 
   - Instance Name: JenkinsServer
@@ -393,7 +393,7 @@
   - Launch Instance
 
 
-#### Step 3: Post Installation Tasks:
+### Step 3: Post Installation Tasks:
 
 - Login to the Jenkins instance
 - `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
@@ -474,7 +474,7 @@ Plugin required
 - Username: `admin`, Password: `admin`
 
 
-#### Step 4: Create Repository in GitHub:
+### Step 4: Create Repository in GitHub:
 
 - Login to github 
 - Create private repository to store the source code and other required files for pipeline
@@ -528,7 +528,7 @@ git push -u origin main
 
 
 
-#### Step 5: Build the job with Nexus Repo:
+### Step 5: Build the job with Nexus Repo:
 
 - SSH into the Jenkins instance
 - `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
@@ -630,3 +630,58 @@ pipeline {
 - Save the job
 - Click on `Build Now` 
 
+
+### Step 5: Configure Github Webhook:
+
+- Copy the Jenkins URL `http://<jenkins_public_ip>:8080/`
+- Go to Github Console 
+- Inside our project repository click on settings 
+- Select Webhook -> Add Webhook
+- Payload URL: `http://<jenkins_public_ip>:8080/github-webhook/`
+- Content Type: `application/json`
+- Event: `Just the push event`
+- Click on Add Webhook 
+
+
+- Go to the Jenkins Console 
+- Click on Job -> Configure -> Build Triggers 
+- [x] Github hook trigger for GITscm polling 
+- Save the configuration 
+
+
+- On local machine 
+- Edit the Jenkinsfile and add post section to archive the artifact
+
+```
+pipeline {
+    agent any 
+    tools {
+        maven "MAVEN3"
+        jdk "OracleJDK8"
+    }
+    environment {
+        SNAP_REPO = 'vprofile-snapshot'
+        NEXUS_USER = 'admin'
+        NEXUS_PASS = 'admin123'
+        RELEASE_REPO = 'vprofile-release'
+        CENTRAL_REPO = 'vpro-maven-central'
+        NEXUSIP = '172.31.5.4'
+        NEXUSPORT = '8081'
+        NEXUS_GRP_REPO = 'vpro-maven-group'
+        NEXUS_LOGIN = 'nexuslogin'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -s settings.xml -DskipTests install'
+            }
+            post {
+                success {
+                    echo "Archiving the artifact.."
+                    archiveArtifacts artifacts: '**/*.war'
+                }
+            }
+        }
+    }
+}
+```
