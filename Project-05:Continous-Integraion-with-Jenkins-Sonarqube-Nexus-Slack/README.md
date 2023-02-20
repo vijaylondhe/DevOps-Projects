@@ -598,7 +598,7 @@ pipeline {
 - Push the code to github
 - `git add .`
 - `git commit -m "added jenkinsfile"`
-- `git push -u origin main`
+- `git push -u origin ci-jenkins`
 
 - Go to Jenkins Console 
 - Click on + New Item on Dashboard
@@ -631,7 +631,7 @@ pipeline {
 - Click on `Build Now` 
 
 
-### Step 5: Configure Github Webhook:
+### Step 6: Configure Github Webhook:
 
 - Copy the Jenkins URL `http://<jenkins_public_ip>:8080/`
 - Go to Github Console 
@@ -642,15 +642,17 @@ pipeline {
 - Event: `Just the push event`
 - Click on Add Webhook 
 
+\
 
 - Go to the Jenkins Console 
 - Click on Job -> Configure -> Build Triggers 
 - [x] Github hook trigger for GITscm polling 
 - Save the configuration 
 
+\
 
 - On local machine 
-- Edit the Jenkinsfile and add post section to archive the artifact
+- Edit the Jenkinsfile and add post section to archive the artifact, also add stages for unit test and checkstyle
 
 ```
 pipeline {
@@ -682,6 +684,27 @@ pipeline {
                 }
             }
         }
+        stage('Test') {
+            steps {
+                sh 'mvn -s settings.xml test'
+            }
+        }
+        stage('Checkstyle Analysis'){
+            steps {
+                sh 'mvn -s settings.xml checkstyle:checkstyle'
+            }
+        }
     }
 }
 ```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added stages for unit test and code analysis"`
+- `git push -u origin ci-jenkins`
+- Pipeline will be triggered automatically 
+
+
+### Step 6: Configure Code Analysis with Sonarqube:
+
