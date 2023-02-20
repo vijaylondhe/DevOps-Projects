@@ -633,6 +633,10 @@ pipeline {
 
 ### Step 6: Configure Github Webhook:
 
+::: info
+On Github Console 
+:::
+
 - Copy the Jenkins URL `http://<jenkins_public_ip>:8080/`
 - Go to Github Console 
 - Inside our project repository click on settings 
@@ -643,14 +647,18 @@ pipeline {
 - Click on Add Webhook 
 
 
-
+::: info
+On Jenkins Console 
+:::
 - Go to the Jenkins Console 
 - Click on Job -> Configure -> Build Triggers 
 - [x] Github hook trigger for GITscm polling 
 - Save the configuration 
 
 
-
+::: info
+On Local Machine 
+:::
 - On local machine 
 - Edit the Jenkinsfile and add post section to archive the artifact, also add stages for unit test and checkstyle
 
