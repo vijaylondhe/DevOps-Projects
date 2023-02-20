@@ -527,3 +527,106 @@ git push -u origin main
 ![GitHub Light](./snaps/vprociproject_repo.png)
 
 
+
+#### Step 5: Build the job with Nexus Repo:
+
+- SSH into the Jenkins instance
+- `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
+- Switch to the root user `sudo -i`
+- `sudo apt update`
+- `sudo apt install openjdk-8-jdk -y`
+- `java -version`
+- Get the jdk8 path 
+- 
+
+- Login to Jenkins console 
+- Go to Manage Jenkins -> Global Tool Configuration 
+- JDK -> JDK Installation
+- Name: OracleJDK8
+- JAVA_HOME: /usr/lib/jvm/java-1.8.0-openjdk-amd64
+- Maven -> Add Maven 
+- Name: MAVEN3
+- Version: 3.8.6
+- Click on Save 
+
+
+- Store Nexus Credentials to login from jenkins 
+- Go to Manage Jenkins -> Manage Credentials
+- Click on Jenkins -> Global Credentials -> Add Credentials
+- Kind: Username with Password
+- Username: admin
+- Password: xxxxx
+- ID: nexuslogin
+- Description: nexuslogin
+- Click on Create
+
+
+- Create Jenkins Pipeline 
+- On local machine 
+- `cd vprociproject`
+- `vim Jenkinsfile`
+
+```
+pipeline {
+    agent any 
+    tools {
+        maven "MAVEN3"
+        jdk "OracleJDK8"
+    }
+    environment {
+        SNAP_REPO = 'vprofile-snapshot'
+        NEXUS_USER = 'admin'
+        NEXUS_PASS = 'admin123'
+        RELEASE_REPO = 'vprofile-release'
+        CENTRAL_REPO = 'vpro-maven-central'
+        NEXUSIP = '172.31.5.4'
+        NEXUSPORT = '8081'
+        NEXUS_GRP_REPO = 'vpro-maven-group'
+        NEXUS_LOGIN = 'nexuslogin'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -s settings.xml -DskipTests install'
+            }
+        }
+    }
+}
+```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added jenkinsfile"`
+- `git push -u origin main`
+
+- Go to Jenkins Console 
+- Click on + New Item on Dashboard
+- Name: vprofile-ci-pipeline
+- Click on Pipeline -> OK
+- In `Pipeline` section select the `Pipeline Script from SCM`
+- SCM -> Git 
+- Repository URL: `git@github.com:vijaylondhe/vprociproject.git`
+- Credentials: Add the Credentials as `SSH Username with private key`
+- ID: `githublogin`
+- Description: `githublogin`
+- Username: `git`
+- Private Key -> Enter Directly -> `paste the private key from local machine i.e ~/.ssh/id_rsa`
+- Click on Add
+
+
+- SSH into Jenkins instance 
+- `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
+- Switch to the root user `sudo -i`
+- Switch to the `jenkins` user `su - jenkins`
+- Execute the command `git ls-remote -h git@github.com:vijaylondhe/vprociproject.git HEAD`
+- Verify the key is added into known_hosts
+- `cat .ssh/known_hosts`
+
+- Go back to the Jenkins Console 
+- Select the 'githublogin' credential 
+- Branches to build: `ci-jenkins`
+- Script Path: `Jenkinsfile`
+- Save the job
+- Click on `Build Now` 
+
