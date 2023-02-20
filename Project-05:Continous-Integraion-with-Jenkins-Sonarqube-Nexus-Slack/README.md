@@ -633,10 +633,6 @@ pipeline {
 
 ### Step 6: Configure Github Webhook:
 
-::: info
-On Github Console 
-:::
-
 - Copy the Jenkins URL `http://<jenkins_public_ip>:8080/`
 - Go to Github Console 
 - Inside our project repository click on settings 
@@ -647,61 +643,24 @@ On Github Console
 - Click on Add Webhook 
 
 
-::: info
-On Jenkins Console 
-:::
 - Go to the Jenkins Console 
 - Click on Job -> Configure -> Build Triggers 
 - [x] Github hook trigger for GITscm polling 
 - Save the configuration 
 
 
-::: info
-On Local Machine 
-:::
 - On local machine 
 - Edit the Jenkinsfile and add post section to archive the artifact, also add stages for unit test and checkstyle
 
 ```
-pipeline {
-    agent any 
-    tools {
-        maven "MAVEN3"
-        jdk "OracleJDK8"
+stage('Test') {
+    steps {
+        sh 'mvn -s settings.xml test'
     }
-    environment {
-        SNAP_REPO = 'vprofile-snapshot'
-        NEXUS_USER = 'admin'
-        NEXUS_PASS = 'admin123'
-        RELEASE_REPO = 'vprofile-release'
-        CENTRAL_REPO = 'vpro-maven-central'
-        NEXUSIP = '172.31.5.4'
-        NEXUSPORT = '8081'
-        NEXUS_GRP_REPO = 'vpro-maven-group'
-        NEXUS_LOGIN = 'nexuslogin'
-    }
-    stages {
-        stage('Build') {
-            steps {
-                sh 'mvn -s settings.xml -DskipTests install'
-            }
-            post {
-                success {
-                    echo "Archiving the artifact.."
-                    archiveArtifacts artifacts: '**/*.war'
-                }
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn -s settings.xml test'
-            }
-        }
-        stage('Checkstyle Analysis'){
-            steps {
-                sh 'mvn -s settings.xml checkstyle:checkstyle'
-            }
-        }
+}
+stage('Checkstyle Analysis'){
+    steps {
+        sh 'mvn -s settings.xml checkstyle:checkstyle'
     }
 }
 ```
@@ -714,5 +673,115 @@ pipeline {
 - Pipeline will be triggered automatically 
 
 
-### Step 6: Configure Code Analysis with Sonarqube:
+### Step 7: Configure Code Analysis with Sonarqube:
 
+#### Add Sonarqube Server Configuration: 
+
+- Go to Jenkins Console 
+- Manage Jenkins -> Global Tool Configuration -> Sonarqube Scanner -> Add Sonarqube Scanner
+- Name: `sonarscanner`
+- Install from Maven Cental: Choose the latest version 
+- Click on Save 
+- Manage Jenkins -> Configure System -> Sonarqube Servers 
+- Add Sonarqube 
+- Name: `sonarserver`
+- Server URL: `http://172.31.10.40`
+- Server Authentication Token: Generate the token from sonarqube console 
+- Login to sonarqube console 
+- Go to My Account -> Security -> Token Name (jenkins) -> Click on generate 
+- Copy this token and paste in jenkins settings for sonarqube server 
+- In Server Authentication add the credential
+- Kind: `Secret Text`
+- Secret: `paste the token copied from sonarqube console`
+- ID: `sonartoken`
+- Description: `sonartoken`
+- Click on Add 
+- Select the token and click on Save
+
+#### Edit the Jenkinsfile: 
+
+- Add the stage for Sonar Analysis
+- `vi Jenkinsfile`
+
+```
+stage('Sonar Analysis'){
+    environment {
+        scannerHome = tool "${SONARSCANNER}"
+    }
+    steps {
+        withSonarQubeEnv("${SONARSERVER}"){
+            sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+            -Dsonar.projectName=vprofile-repo \
+            -Dsonar.projectVersion=1.0 \
+            -Dsonar.sources=src/ \
+            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+            -Dsonar.junit.reportsPath=target/surefire-reports/ \
+            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+        }
+    }
+}
+```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added stage for sonarqube"`
+- `git push -u origin ci-jenkins`
+- Pipeline will be triggered automatically 
+- Check the build logs 
+
+- Go to the Sonarqube Console 
+- Click on `Projects`
+- You will see `vprofile` project is created 
+- Check on that project, sonar quality gate has passed 
+- Note: This has default quality gate
+
+
+
+### Step 8: Create Sonar Qaulity Gate:
+
+- Go to the Sonarqube Console 
+- Click on Quality Gate
+- Create 
+- Name: `vprofileQG`
+- Add Condition -> On Overall Code
+- Quality Gate fails when -> `Bugs` is greater than `25` -> Add Condition
+- Go to the Projects -> Click on `vprofile` -> Project Settings -> Quality Gate -> Select `vprofileQG`
+
+#### Congihure webhook in sonarqube console 
+
+- This webhook is required so that sonarqube server will know the jenkins server details to send the reports
+- In Sonarqube console, click on `Project Settings` -> `Webhooks` -> `Create`
+- Name: `jenkinswebhook`
+- URL: `http://<jenkins_private_ip>:8080/sonarqube-webhook`
+- Click on `Create`
+
+- Edit the Jenkinsfile and add stage for Quality Gate 
+
+```
+stage('Quality Gate'){
+    steps {
+        timeout(time: 1, units: 'HOURS'){
+            waitForQualityGate abortPipeline:true
+        }
+    }
+}
+```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added stage for quality gate"`
+- `git push -u origin ci-jenkins`
+- Pipeline will be triggered automatically 
+- Check the build logs 
+
+
+- You will see the pipeline is failed 
+- As we have mentioned configured quality gate with bugs if greater than 25 then abort the pipeline
+- Go to the Sonarqube Console
+- Click on `Quality Gate` -> `vprofileQG`
+- Edit and make `bugs` value greater than `100` 
+- Update the Condition
+- In Jenkins console click on `Build Now` 
