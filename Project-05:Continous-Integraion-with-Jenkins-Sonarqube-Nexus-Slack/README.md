@@ -651,6 +651,7 @@ pipeline {
 
 - On local machine 
 - Edit the Jenkinsfile and add post section to archive the artifact, also add stages for unit test and checkstyle
+- `vim Jenkinsfile`
 
 ```
 stage('Test') {
@@ -701,7 +702,7 @@ stage('Checkstyle Analysis'){
 #### Edit the Jenkinsfile: 
 
 - Add the stage for Sonar Analysis
-- `vi Jenkinsfile`
+- `vim Jenkinsfile`
 
 ```
 stage('Sonar Analysis'){
