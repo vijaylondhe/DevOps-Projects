@@ -654,6 +654,17 @@ pipeline {
 - `vim Jenkinsfile`
 
 ```
+stage('Build') {
+    steps {
+        sh 'mvn -s settings.xml -DskipTests install'
+    }
+    post {
+        success {
+            echo "Archiving the artifact.."
+            archiveArtifacts artifacts: '**/*.war'
+        }
+    }
+}
 stage('Test') {
     steps {
         sh 'mvn -s settings.xml test'
@@ -750,7 +761,7 @@ stage('Sonar Analysis'){
 - Quality Gate fails when -> `Bugs` is greater than `25` -> Add Condition
 - Go to the Projects -> Click on `vprofile` -> Project Settings -> Quality Gate -> Select `vprofileQG`
 
-#### Congihure webhook in sonarqube console 
+#### Configure webhook in sonarqube console 
 
 - This webhook is required so that sonarqube server will know the jenkins server details to send the reports
 - In Sonarqube console, click on `Project Settings` -> `Webhooks` -> `Create`
@@ -759,6 +770,7 @@ stage('Sonar Analysis'){
 - Click on `Create`
 
 - Edit the Jenkinsfile and add stage for Quality Gate 
+- `vim Jenkinsfile`
 
 ```
 stage('Quality Gate'){
@@ -786,3 +798,90 @@ stage('Quality Gate'){
 - Edit and make `bugs` value greater than `100` 
 - Update the Condition
 - In Jenkins console click on `Build Now` 
+
+
+### Step 9: Publish Artifact to Nexus Repo:
+
+- Setup Build Timestamp
+- This will be used to version the artifact based on build timestamp
+- Go to `Manage Jenkin` -> `Configure System` -> `Build Timestamp`
+- Enable Build Timestamp
+- Pattern: `yy-MM-dd_HHmm`
+
+- Edit the Jenkinsfile and add stage for artifact upload to nexus repo 
+- `vim Jenkinsfile`
+
+```
+stage('UploadArtifact'){
+    steps {
+            nexusArtifactUploader(
+            nexusVersion: 'nexus3',
+            protocol: 'http',
+            nexusUrl: ""${NEXUSIP}:${NEXUSPORT},
+            groupId: 'QA',
+            version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+            repository: "${RELEASE_REPO}",
+            credentialsId: "${NEXUS_LOGIN}",
+            artifacts: [
+                [artifactId: 'vproapp',
+                classifier: '',
+                file: 'target/vprofile-v2.war',
+                type: 'war']
+            ]
+        )
+    }
+}
+```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added stage for artifact upload to nexus"`
+- `git push -u origin ci-jenkins`
+- Pipeline will be triggered automatically 
+- Check the build logs 
+
+
+### Step 10: Setup Slack Notification:
+
+- Login to the slack account
+- Workspace Name: `vprofilecicd`
+- What's your team working on: `devopscicd`
+- Provide email address
+- Add teammates
+- Create new channel -> Name: `jenkinscicd`
+- Enable automatically joins anyone who joins `vprofilecicd`
+- Add Slack apps -> `Jenkins CI` -> choose channel -> `jenkinscicd`
+- Add Jenkins CI Integration
+- Copy the `token` 
+- Save the settings
+
+- Login to Jenkins Console 
+- `Manage Jenkins` -> `Configure System`
+- Search for Slack
+- Workspace: `vprofilecicd`
+- Credentials: Add credentials (Secret Text) ID: `slacktoken` Description: `slacktoken`
+- Default Channel: `#jenkinscicd`
+- Click on Test Connection
+
+- Edit the Jenkinsfile and add post action after stages for slack notification
+- `vim Jenkinsfile`
+
+```
+post{
+    always {
+        echo 'Slack Notifications.'
+        slackSend channel: '#jenkinscicd',
+        color: COLOR_MAP[currentBuild.currentResult],
+        message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}" 
+    }
+}
+```
+
+- Save and exit the file 
+- Push the code to github
+- `git add .`
+- `git commit -m "added stage for slack notification"`
+- `git push -u origin ci-jenkins`
+- Pipeline will be triggered automatically 
+- Check the build logs 
