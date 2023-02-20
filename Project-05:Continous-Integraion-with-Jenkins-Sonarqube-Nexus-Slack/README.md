@@ -642,14 +642,14 @@ pipeline {
 - Event: `Just the push event`
 - Click on Add Webhook 
 
-\
+
 
 - Go to the Jenkins Console 
 - Click on Job -> Configure -> Build Triggers 
 - [x] Github hook trigger for GITscm polling 
 - Save the configuration 
 
-\
+
 
 - On local machine 
 - Edit the Jenkinsfile and add post section to archive the artifact, also add stages for unit test and checkstyle
