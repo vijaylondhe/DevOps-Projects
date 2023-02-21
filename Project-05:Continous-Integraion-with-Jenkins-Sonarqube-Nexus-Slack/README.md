@@ -65,7 +65,7 @@
 - Private key file format: .pem 
 - Click on Create Key Pair
 
-![GitHub Light](./snaps/<>.jpg)
+![GitHub Light](./snaps/access_key.png)
 
 - Go to VPC service
 - Click on Security Groups
@@ -100,7 +100,7 @@
   
   - Click on Create Security Group 
 
-![GitHub Light](./snaps/<>.jpg)
+![GitHub Light](./snaps/sg_jenkins.png)
 
 
 - Create Security Group for Nexus Instance
@@ -134,7 +134,7 @@
   
   - Click on Create Security Group 
 
-![GitHub Light](./snaps/<>.jpg)
+![GitHub Light](./snaps/sg_nexus.png)
 
 
 - Create Security Group for Sonar Instance
@@ -168,7 +168,7 @@
   
   - Click on Create Security Group 
 
-![GitHub Light](./snaps/<>.jpg)
+![GitHub Light](./snaps/sg_sonar.png)
 
 
 - Modify Security Group of Jenkins Instance
@@ -180,7 +180,7 @@
     Source: Custom (sg id of sonar-sg)
     Description: for ssh access to soanr instance 
     ```
-![GitHub Light](./snaps/<>.jpg)
+![GitHub Light](./snaps/sg_jennkis_updated.png)
 
 
 ### Step 2: Create EC2 Instances for Jenkins, Nexus and Sonarqube:
@@ -393,6 +393,9 @@
   - Launch Instance
 
 
+![GitHub Light](./snaps/all_ec2.png)
+
+
 ### Step 3: Post Installation Tasks:
 
 - Login to the Jenkins instance
@@ -403,10 +406,32 @@
 - Open the browser and type `http://<public_ip_address_of_jenkins>:8080`
 
 - Get the initial password for the jenkins from `/var/lib/jenkins/secrets/initialAdminPassword`
+
+![GitHub Light](./snaps/unlock_jenkins.png)  
+
 - Click on Install suggested plugins
+
+![GitHub Light](./snaps/customize_jenkins.png) 
+
+- Plugins installation will be started 
+
+![GitHub Light](./snaps/plugins_installation.png) 
+
+
 - Setup the Admin username, full name and E-mail id 
+
+![GitHub Light](./snaps/jenkins_admin_user.png) 
+
 - Set Jenkins URL -> Save and Finish
+
+![GitHub Light](./snaps/jenkins_url_conf.png) 
+
+
 - Login to the Jenkins UI 
+
+![GitHub Light](./snaps/welcome_to_jenkins.png) 
+
+
 - Install the required plugin for our CI pipeline
 - Go to the Manage Jenkins -> Manage Plugins -> Click on Available
 
@@ -420,12 +445,13 @@ Plugin required
 6. Build Timestamp: To version the artifact
 
 ```
+![GitHub Light](./snaps/install_plugins_jenkins.png) 
 
 - Click on install without restart
 - Once plugins installation is complete go back to Dashboard
 
 
-
+#### Setup Nexus Repos:
 
 - Login to the Nexus instance
 - `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_nexus>`
@@ -462,7 +488,10 @@ Plugin required
 - In Group section add above 3 repositories in Member repositories (`vprofile-release`, `vpro-maven-central`, `vprofile-snapshot`) 
 - Click on Create Repository
 
+![GitHub Light](./snaps/nexus_repo_creation.png) 
 
+
+#### Check Sonarqube Instance
 
 - Login to the Sonarqube instance
 - `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_sonarqube>`
@@ -634,6 +663,7 @@ pipeline {
 - Save the job
 - Click on `Build Now` 
 
+![GitHub Light](./snaps/first_pipeline_build.png)
 
 ### Step 6: Configure Github Webhook:
 
@@ -646,6 +676,7 @@ pipeline {
 - Event: `Just the push event`
 - Click on Add Webhook 
 
+![GitHub Light](./snaps/github_webhooks.png)
 
 - Go to the Jenkins Console 
 - Click on Job -> Configure -> Build Triggers 
@@ -687,6 +718,8 @@ stage('Checkstyle Analysis'){
 - `git commit -m "added stages for unit test and code analysis"`
 - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
+
+![GitHub Light](./snaps/second_pipeline_checkstyle.png)
 
 
 ### Step 7: Configure Code Analysis with Sonarqube:
@@ -753,7 +786,7 @@ stage('Sonar Analysis'){
 - Check on that project, sonar quality gate has passed 
 - Note: This has default quality gate
 
-
+![GitHub Light](./snaps/third_pipeline_sonar_analysis.png)
 
 ### Step 8: Create Sonar Qaulity Gate:
 
@@ -803,6 +836,8 @@ stage('Quality Gate'){
 - Update the Condition
 - In Jenkins console click on `Build Now` 
 
+![GitHub Light](./snaps/fourth_pipeline_quality_date.png)
+
 
 ### Step 9: Publish Artifact to Nexus Repo:
 
@@ -845,6 +880,7 @@ stage('UploadArtifact'){
 - Pipeline will be triggered automatically 
 - Check the build logs 
 
+![GitHub Light](./snaps/fifth_pipeline_nexus_upload.png)
 
 ### Step 10: Setup Slack Notification:
 
