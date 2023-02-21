@@ -399,10 +399,10 @@
 ### Step 3: Post Installation Tasks:
 
 - Login to the Jenkins instance
-- `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
-- Check the Jenkins service is running or not 
-- Switch to the root user `sudo -i`
-- Run the command `systemctl status jenkins`
+  - `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
+  - Check the Jenkins service is running or not 
+  - Switch to the root user `sudo -i`
+  - Run the command `systemctl status jenkins`
 - Open the browser and type `http://<public_ip_address_of_jenkins>:8080`
 
 - Get the initial password for the jenkins from `/var/lib/jenkins/secrets/initialAdminPassword`
@@ -516,13 +516,13 @@ Plugin required
 
 
 - Setup the SSH authentication between your local machine and github account
-- On local machine run -> `ssh-keygen`
-- This will create private and public key i.e (`id_rsa` and `id_rsa.pub`)
-- Copy public key
-- Go to github settings -> SSH and GPG key -> New SSH key
-- Title: `mylaptopkey`
-- Key: `paste the public key`
-- Click on Add SSH key 
+  - On local machine run -> `ssh-keygen`
+  - This will create private and public key i.e (`id_rsa` and `id_rsa.pub`)
+  - Copy public key
+  - Go to github settings -> SSH and GPG key -> New SSH key
+  - Title: `mylaptopkey`
+  - Key: `paste the public key`
+  - Click on Add SSH key 
 - Test the connection from local machine `ssh -T git@github.com`
 
 
