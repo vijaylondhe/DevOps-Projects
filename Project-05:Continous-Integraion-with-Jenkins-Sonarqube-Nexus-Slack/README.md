@@ -633,20 +633,8 @@ pipeline {
 - `git commit -m "added jenkinsfile"`
 - `git push -u origin ci-jenkins`
 
-- Go to Jenkins Console 
-- Click on + New Item on Dashboard
-- Name: vprofile-ci-pipeline
-- Click on Pipeline -> OK
-- In `Pipeline` section select the `Pipeline Script from SCM`
-- SCM -> Git 
-- Repository URL: `git@github.com:vijaylondhe/vprociproject.git`
-- Credentials: Add the Credentials as `SSH Username with private key`
-- ID: `githublogin`
-- Description: `githublogin`
-- Username: `git`
-- Private Key -> Enter Directly -> `paste the private key from local machine i.e ~/.ssh/id_rsa`
-- Click on Add
 
+#### Add key in Jenkins known_hosts:
 
 - SSH into Jenkins instance 
 - `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
@@ -656,7 +644,22 @@ pipeline {
 - Verify the key is added into known_hosts
 - `cat .ssh/known_hosts`
 
-- Go back to the Jenkins Console 
+
+#### Create New Pipeline:
+
+- Go to Jenkins Console 
+- Click on + New Item on Dashboard
+- Name: vprofile-ci-pipeline
+- Click on Pipeline -> OK
+- In `Pipeline` section select the `Pipeline Script from SCM`
+- SCM -> Git 
+- Repository URL: `git@github.com:vijaylondhe/vprociproject.git`
+  - Credentials: Add the Credentials as `SSH Username with private key`
+  - ID: `githublogin`
+  - Description: `githublogin`
+  - Username: `git`
+  - Private Key -> Enter Directly -> `paste the private key from local machine i.e ~/.ssh/id_rsa`
+  - Click on Add
 - Select the 'githublogin' credential 
 - Branches to build: `ci-jenkins`
 - Script Path: `Jenkinsfile`
@@ -664,6 +667,7 @@ pipeline {
 - Click on `Build Now` 
 
 ![GitHub Light](./snaps/first_pipeline_build.png)
+
 
 ### Step 6: Configure Github Webhook:
 
@@ -728,23 +732,24 @@ stage('Checkstyle Analysis'){
 
 - Go to Jenkins Console 
 - Manage Jenkins -> Global Tool Configuration -> Sonarqube Scanner -> Add Sonarqube Scanner
-- Name: `sonarscanner`
-- Install from Maven Cental: Choose the latest version 
-- Click on Save 
+  - Name: `sonarscanner`
+  - Install from Maven Cental: Choose the latest version 
+  - Click on Save 
 - Manage Jenkins -> Configure System -> Sonarqube Servers 
-- Add Sonarqube 
-- Name: `sonarserver`
-- Server URL: `http://172.31.10.40`
-- Server Authentication Token: Generate the token from sonarqube console 
+  - Add Sonarqube 
+  - Name: `sonarserver`
+  - Server URL: `http://172.31.10.40`
+  - Server Authentication Token: Generate the token from sonarqube console 
+
 - Login to sonarqube console 
-- Go to My Account -> Security -> Token Name (jenkins) -> Click on generate 
+  - Go to My Account -> Security -> Token Name (jenkins) -> Click on generate 
 - Copy this token and paste in jenkins settings for sonarqube server 
 - In Server Authentication add the credential
-- Kind: `Secret Text`
-- Secret: `paste the token copied from sonarqube console`
-- ID: `sonartoken`
-- Description: `sonartoken`
-- Click on Add 
+  - Kind: `Secret Text`
+  - Secret: `paste the token copied from sonarqube console`
+  - ID: `sonartoken`
+  - Description: `sonartoken`
+  - Click on Add 
 - Select the token and click on Save
 
 #### Edit the Jenkinsfile: 
