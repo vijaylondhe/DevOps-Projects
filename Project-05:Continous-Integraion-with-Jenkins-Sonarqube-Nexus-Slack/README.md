@@ -532,16 +532,17 @@ git push -u origin main
 
 - SSH into the Jenkins instance
 ```
-- `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
-- Switch to the root user `sudo -i`
-- `sudo apt update`
-- `sudo apt install openjdk-8-jdk -y`
-- `java -version`
+- ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>
+- Switch to the root user sudo -i
+- sudo apt update
+- sudo apt install openjdk-8-jdk -y
+- java -version
 - Get the jdk8 path 
-- `ls -l /usr/lib/jvm`
+- ls -l /usr/lib/jvm
 ```
 
 - Login to Jenkins console 
+```
 - Go to Manage Jenkins -> Global Tool Configuration 
 - JDK -> JDK Installation
 - Name: OracleJDK8
@@ -550,9 +551,10 @@ git push -u origin main
 - Name: MAVEN3
 - Version: 3.8.6
 - Click on Save 
-
+```
 
 - Store Nexus Credentials to login from jenkins 
+```
 - Go to Manage Jenkins -> Manage Credentials
 - Click on Jenkins -> Global Credentials -> Add Credentials
 - Kind: Username with Password
@@ -561,7 +563,7 @@ git push -u origin main
 - ID: nexuslogin
 - Description: nexuslogin
 - Click on Create
-
+```
 
 - Create Jenkins Pipeline 
 - On local machine
