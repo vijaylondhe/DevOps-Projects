@@ -454,39 +454,40 @@ Plugin required
 #### Setup Nexus Repos:
 
 - Login to the Nexus instance
-- `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_nexus>`
-- Switch to the root user `sudo -i`
-- Check the Nexus service is running or not 
-- Run the command `systemctl status nexus`
+  - `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_nexus>`
+  - Switch to the root user `sudo -i`
+  - Check the Nexus service is running or not 
+  - Run the command `systemctl status nexus`
+
 - Open the browser and type `http://<public_ip_address_of_nexus>:8081`
-- Click on Sign in 
-- Get the initial password from the file `/opt/nexus/sonatype-work/nexus3/admin.password`
-- Login and give the new password
-- Click on Disable anonymous access -> Next -> Finish
+  - Click on Sign in 
+  - Get the initial password from the file `/opt/nexus/sonatype-work/nexus3/admin.password`
+  - Login and give the new password
+  - Click on Disable anonymous access -> Next -> Finish
 
 - Create 4 different repositories
 - Click on Settings -> Repository -> Repositories  Create Repository
 
 - Create Repository -> `maven2 (hosted)`
-- Name: `vprofile-release` => This will store our artifact
-- Version Policy -> `release`
-- Click on Create Repository
+  - Name: `vprofile-release` => This will store our artifact
+  - Version Policy -> `release`
+  - Click on Create Repository
 
 - Create Repository -> `maven2 (proxy)`
-- Name: `vpro-maven-central` => This will store maven dependencies
-- Proxy -> Remote Storage -> `https://repo1.maven.org/maven2/`
-- Click on Create Repository
+  - Name: `vpro-maven-central` => This will store maven dependencies
+  - Proxy -> Remote Storage -> `https://repo1.maven.org/maven2/`
+  - Click on Create Repository
 
 - Create Repository -> `maven2 (hosted)`
-- Name: `vprofile-snapshot` => This will store snapshot artifact
-- Version Policy -> `snapshot`
-- Click on Create Repository
+  - Name: `vprofile-snapshot` => This will store snapshot artifact
+  - Version Policy -> `snapshot`
+  - Click on Create Repository
 
 - Create Repository -> `maven2 (group)`
-- Name: `vpro-maven-group` => This will use to group all above 3 repositories
-- Version Policy -> `release`
-- In Group section add above 3 repositories in Member repositories (`vprofile-release`, `vpro-maven-central`, `vprofile-snapshot`) 
-- Click on Create Repository
+  - Name: `vpro-maven-group` => This will use to group all above 3 repositories
+  - Version Policy -> `release`
+  - In Group section add above 3 repositories in Member repositories (`vprofile-release`,`vpro-maven-central`, `vprofile-snapshot`) 
+  - Click on Create Repository
 
 ![GitHub Light](./snaps/nexus_repo_creation.png) 
 
@@ -494,13 +495,14 @@ Plugin required
 #### Check Sonarqube Instance
 
 - Login to the Sonarqube instance
-- `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_sonarqube>`
-- Switch to the root user `sudo -i`
-- Check the Sonarqube service is running or not 
-- Run the command `systemctl status sonar`
+  - `ssh -i vprofile-ci-key ec2-user@<public_ip_address_of_sonarqube>`
+  - Switch to the root user `sudo -i`
+  - Check the Sonarqube service is running or not 
+  - Run the command `systemctl status sonar`
+
 - Open the browser and type `http://<public_ip_address_of_sonarqube>`
-- Click on Login
-- Username: `admin`, Password: `admin`
+  - Click on Login
+  - Username: `admin`, Password: `admin`
 
 
 ### Step 4: Create Repository in GitHub:
@@ -718,9 +720,9 @@ stage('Checkstyle Analysis'){
 
 - Save and exit the file 
 - Push the code to github
-- `git add .`
-- `git commit -m "added stages for unit test and code analysis"`
-- `git push -u origin ci-jenkins`
+  - `git add .`
+  - `git commit -m "added stages for unit test and code analysis"`
+  - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
 
 ![GitHub Light](./snaps/second_pipeline_checkstyle.png)
@@ -779,9 +781,9 @@ stage('Sonar Analysis'){
 
 - Save and exit the file 
 - Push the code to github
-- `git add .`
-- `git commit -m "added stage for sonarqube"`
-- `git push -u origin ci-jenkins`
+  - `git add .`
+  - `git commit -m "added stage for sonarqube"`
+  - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
 - Check the build logs 
 
@@ -826,9 +828,9 @@ stage('Quality Gate'){
 
 - Save and exit the file 
 - Push the code to github
-- `git add .`
-- `git commit -m "added stage for quality gate"`
-- `git push -u origin ci-jenkins`
+  - `git add .`
+  - `git commit -m "added stage for quality gate"`
+  - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
 - Check the build logs 
 
@@ -879,9 +881,9 @@ stage('UploadArtifact'){
 
 - Save and exit the file 
 - Push the code to github
-- `git add .`
-- `git commit -m "added stage for artifact upload to nexus"`
-- `git push -u origin ci-jenkins`
+  - `git add .`
+  - `git commit -m "added stage for artifact upload to nexus"`
+  - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
 - Check the build logs 
 
@@ -925,8 +927,8 @@ post{
 
 - Save and exit the file 
 - Push the code to github
-- `git add .`
-- `git commit -m "added stage for slack notification"`
-- `git push -u origin ci-jenkins`
+  - `git add .`
+  - `git commit -m "added stage for slack notification"`
+  - `git push -u origin ci-jenkins`
 - Pipeline will be triggered automatically 
 - Check the build logs 
