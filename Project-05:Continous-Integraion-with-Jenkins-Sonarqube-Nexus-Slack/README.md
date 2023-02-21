@@ -316,7 +316,7 @@
     sudo useradd -c "SonarQube - User" -d /opt/sonarqube/ -g sonar sonar
     sudo chown sonar:sonar /opt/sonarqube/ -R
     cp /opt/sonarqube/conf/sonar.properties /root/sonar.properties_backup
-    cat <<EOT> /opt/sonarqube/conf/sonar.properties
+    cat <<EOT>> /opt/sonarqube/conf/sonar.properties
     sonar.jdbc.username=sonar
     sonar.jdbc.password=admin123
     sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube
@@ -328,7 +328,7 @@
     sonar.path.logs=logs
     EOT
 
-    cat <<EOT> /etc/systemd/system/sonarqube.service
+    cat <<EOT>> /etc/systemd/system/sonarqube.service
     [Unit]
     Description=SonarQube service
     After=syslog.target network.target
@@ -531,13 +531,15 @@ git push -u origin main
 ### Step 5: Build the job with Nexus Repo:
 
 - SSH into the Jenkins instance
+```
 - `ssh -i vprofile-ci-key ubuntu@<public_ip_address_of_jenkins>`
 - Switch to the root user `sudo -i`
 - `sudo apt update`
 - `sudo apt install openjdk-8-jdk -y`
 - `java -version`
 - Get the jdk8 path 
-
+- `ls -l /usr/lib/jvm`
+```
 
 - Login to Jenkins console 
 - Go to Manage Jenkins -> Global Tool Configuration 
@@ -562,7 +564,7 @@ git push -u origin main
 
 
 - Create Jenkins Pipeline 
-- On local machine 
+- On local machine
 - `cd vprociproject`
 - `vim Jenkinsfile`
 
