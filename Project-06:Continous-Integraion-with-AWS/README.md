@@ -15,6 +15,7 @@
 - AWS CodePipeline
 - AWS Systems Manager
 - AWS S3 
+- AWS SNS
 - SonarCloud
 
 ### Architecture:
@@ -57,7 +58,7 @@
 - Test the Pipeline
 
 
-### Step 1: Create CodeCommit Repo and IAM User:
+### Step 1: Create CodeCommit Repository and IAM User:
 
 - Login to AWS Console 
 - Go to CodeCommit Service
@@ -143,3 +144,124 @@ git push --tags
 - Go to the CodeCommit service and check `vprofile-code-repo` repository have added files from our local repository.
 
 ![GitHub Light](./snaps/repo_after_push.png)
+
+
+### Step 2: Setup CodeArtifact:
+
+create repo
+create user with code artifact poilcy
+install aws cli on local machine
+run aws configure
+go to code artifact and check connection settings for maven 
+update settings.xml
+update pom.xml
+commit the code to codecommit on ci-aws branch 
+
+
+### Step 3: Setup SonarCloud Account:
+
+create account on sonarcloud 
+create token
+create project manually 
+
+### Step 4: Setup SSM Parameter Store:
+
+create parameter store in systems manager
+create organization name 
+create host https://sonarcloud.io
+project vprofile-repo
+sonartoken securestring 
+codeartifact-token securestring
+
+### Step 5: Setup CodeBuild for Sonarqube Code Analysis:
+
+modify code build role to access the parameter store
+create iam policy and attach to the role 
+create codebuild project 
+add buidlspec file 
+set cloudwatch logs for the build 
+
+- Buildspec file for sonarqube code analysis
+
+```
+version: 0.2 
+env: 
+  parameter-store:
+    LOGIN: sonartoken
+    HOST: HOST
+    Organization: Organization
+    Project: Project
+    CODEARTIFACT_AUTH_TOKEN: CODEARTIFACT_AUTH_TOKEN
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+    commands:
+    - cp ./settings.xml /root/.m2/settings.xml
+  pre_build:
+    commands: 
+      - apt-get update 
+      - apt-get install -y jq checkstyle
+      - wget http://www-eu.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+      - tar xzf apache-maven-3.5.4-bin.tar.gz
+      - ln -s apache-maven-3.5.4 maven
+      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
+      - unzip ./sonar-scanner-cli-3.3.0.1492-linux.zip
+      - export PATH=$PATH:/sonar-scanner-3.3.0.1492-linux/bin/
+  build:
+    commands:
+      - mvn test
+      - mvn checkstyle:checkstyle
+      - echo "Installing JDK11 as its a dependency for sonarqube code analysis"
+      - apt-get install -y openjdk-11-jdk
+      - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ -Dsonar.junit.reportsPath=target/surefire-reports/ -Dsonar.jacoco.reportsPath=target/jacoco.exec -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
+      - sleep 5 
+      - curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project >result.json 
+      - cat result.json
+      - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+```
+
+### Step 6: Setup CodeBuild for Build Artifact:
+
+- Buildspec file to build the artifact and store in code artifact
+
+```
+version: 0.2
+env:
+  parameter-store:
+    CODEARTIFACT_AUTH_TOKEN: CODEARTIFACT_AUTH_TOKEN
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+    commands:
+      - cp ./settings.xml /root/.m2/settings.xml
+  pre_build:
+    commands:
+      - apt-get update 
+      - apt-get install -y jq 
+      - wget http://www-eu.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+      - tar xzf apache-maven-3.5.4-bin.tar.gz
+      - ln -s apache-maven-3.5.4 maven
+  build:
+    commands:
+      - mvn clean install -DskipTests
+artifacts:
+  files:
+    - target/**/*.war
+  discard-paths: yes
+```
+
+### Step 7: Setup CodePipeline:
+
+create pipeline 
+source - code commit and repo name 
+add build artifact stage 
+create piepline 
+add stage for sonarqube analysis
+create bucket with folder 
+add stage for deploy to s3
+extact the artifact 
+setup notification 
+run the pipeline 
