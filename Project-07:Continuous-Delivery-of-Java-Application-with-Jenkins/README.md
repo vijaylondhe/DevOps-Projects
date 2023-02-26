@@ -13,11 +13,30 @@
 
 ### Objectives:
 
-
-
-
+Setup the Continuous delivery pipeline with jenkins to fetch the latest docker image of our application and deploy docker container on ECS.
 
 ### Tools/Services Used:
+
+- Jenkins: Continuous Integration and Continuous Delivery Server.
+
+- Nexus Sonatype Repository: Download Maven Dependency and Upload Build Artifact.
+
+- Sonarqube: Sonarqube scanner for code analysis, and sonarqube server to check the quality gates.
+
+- Maven: Used in jenkins to build the java application.
+
+- Git Repository: Used to store our source code with jenkins pipeline code.
+
+- Slack: For notification 
+
+- Docker: To build the docker image from our application
+
+- AWS Elastic Container Registry (ECR): To publish and store the docker image.
+
+- AWS Elastic Container Service (ECS): Used to host the docker containers for our application.
+
+- AWS CLI: Used to run from the jenkins to fetch the latest image from ECR and and run the service in ECS.
+
 
 ### Architecture:
 
