@@ -263,12 +263,41 @@ git push origin ci-aws
 
 ### Step 4: Setup SSM Parameter Store:
 
-create parameter store in systems manager
-create organization name 
-create host https://sonarcloud.io
-project vprofile-repo
-sonartoken securestring 
-codeartifact-token securestring
+- Go to the Systems Manager Service 
+- In Application Management section -> Click on `Parameter Store`
+- Click on `Create Parameter`
+
+```
+Name: Organization
+Type: String
+Value: vprofile-soanr-cloud-project
+```
+
+```
+Name: HOST
+Type: String
+Value: https://sonarcloud.io
+```
+
+```
+Name: Project
+Type: String
+Value: vprofile-repo
+```
+
+```
+Name: sonartoken
+Type: SecureString
+Value: <enter-the-token-genrated-from-sonarcloud>
+```
+
+```
+Name: codeartifact-token
+Type: SecureString
+Value: <enter-the-token-genrated-from-codeartifact>
+```
+
+![GitHub Light](./snaps/ssm_parameter.png)
 
 ### Step 5: Setup CodeBuild for Sonarqube Code Analysis:
 
