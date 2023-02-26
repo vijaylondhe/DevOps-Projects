@@ -198,7 +198,6 @@ git push --tags
 
 - Login to the local machine
   - Install AWS CLI if not installed 
-  - under the security credentials create access keys
   - Run the command: `aws configure`
   - Enter Access Key ID and Secret Access Key
   - Default Region Name: `us-east-1`
@@ -496,7 +495,7 @@ Branch Name: ci-aws
 Change detection options: Amazon Cloudwatch Events 
 ```
 
-![GitHub Light](./snaps/create_piepline2.png)
+![GitHub Light](./snaps/create_pipeline2.png)
 
 
 ```
