@@ -148,21 +148,118 @@ git push --tags
 
 ### Step 2: Setup CodeArtifact:
 
-create repo
-create user with code artifact poilcy
-install aws cli on local machine
-run aws configure
-go to code artifact and check connection settings for maven 
-update settings.xml
-update pom.xml
-commit the code to codecommit on ci-aws branch 
+- Create repository in Code Artifact 
+  - Go to Code Artifact Service 
+  - Click on Create Repository
+  - Name: `vprofile-maven-repo`
+  - Description: `vprofile-maven-repo`
+  - Public Upstream Repositories: `maven-central-store`
+  - Click on Next
+
+![GitHub Light](./snaps/codeartifact_1.png)
+
+  - Select the Domain
+  - AWS Account: `Select this Account`
+  - Domain Name: `cloudndevops`
+  - Check the domain url is generated below 
+  - Click on Next
+
+![GitHub Light](./snaps/codeartifact_2.png)
+
+  - Review and Create 
+  - Click on Create Repository
+
+![GitHub Light](./snaps/codeartifact_3.png)
+
+- You will see two repositories are created 
+
+![GitHub Light](./snaps/codeartifact_4.png)
+
+- Click on the `maven-central-store` repository
+- Click on `View connection instructions`
+- Step 1: Choose package manager client `mvn`
+- Step 2: Select Configuration Method `Pull from your repository`
+
+![GitHub Light](./snaps/connect_repo1.png)
+
+![GitHub Light](./snaps/connect_repo1.png)
+
+
+- Above commands we need to execute on our local machine 
+- We required IAM user with AWS CLI access to run this command from local machine 
+- Create the IAM user:
+  - Go to the IAM Service
+  - Click on Create User
+  - Username: vprofile-cart-admin
+  - Attach Policy: `AWSCodeArtifactAdminAccess`
+  - Review and Create User
+- Go to the user
+- 
+
+- Login to the local machine
+  - Install AWS CLI if not installed 
+  - under the security credentials create access keys
+  - Run the command: `aws configure`
+  - Enter Access Key ID and Secret Access Key
+  - Default Region Name: `us-east-1`
+  - Default output format: `json`
+ 
+- Export a CodeArtifact authorization token 
+
+![GitHub Light](./snaps/connect_repo3.png)
+
+- Update the settings.xml file 
+  - Update servers section
+  - Update Profile section
+  - Update mirror section
+
+![GitHub Light](./snaps/connect_repo4.png)
+
+- Update the pom.xml file 
+  - Update repositories section
+
+![GitHub Light](./snaps/connect_repo5.png)
+
+- Push the code the CodeCommit repository on ci-aws branch
+
+```
+git add .
+git commit -m "updated pom.xml and settings.xml file"
+git push origin ci-aws
+```
+![GitHub Light](./snaps/push_repo1.png)
 
 
 ### Step 3: Setup SonarCloud Account:
 
-create account on sonarcloud 
-create token
-create project manually 
+- Open the brower 
+- Enter the sonarcloud url `https://sonarcloud.io`
+- Click on Login 
+- You can login to sonarcloud by using your github/bitbucket/gitlab/azure devops credentials
+- Steps: 
+  - Go to My Account 
+  - Under the Security Tab Generate Token
+  - Token Name: `vprofile-sonar-cloud`
+  - Click on My Projects tab
+  - Click on Analyze New Project -> `create project manually`
+    - Create an organization 
+    - Name: `vprofile-sonar-cloud-project`
+    - Key: `vprofile-soanr-cloud-project`
+   
+![GitHub Light](./snaps/sonar_organization.png)
+
+  - Project Name: `vprofile-repo`
+  - Project Key: `vprofile-repo`
+  - Click on Setup 
+
+![GitHub Light](./snaps/sonar_project_setup.png)
+
+- Note down the below details, required for our next step.
+  - Sonarcloud URL: `https://sonarcloud.io`
+  - Organization Name: `vprofile-soanr-cloud-project`
+  - Project Name: `vprofile-repo`
+  - Token: `<token-vprofile-sonar-cloud>`
+
 
 ### Step 4: Setup SSM Parameter Store:
 
