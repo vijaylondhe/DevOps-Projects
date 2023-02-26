@@ -1,6 +1,6 @@
 # Project-01: Setup Web Application Stack on Local Machine 
 
-In this project we will setup the Web Application Stack on the local machine using, this stack includes following tools and services.
+In this project we will setup the Web Application Stack on the local machine. This stack includes following tools and services.
 
 - NGINX: This will be act as load balancer and forward user requests to the Apache Tomcat application server.
 
