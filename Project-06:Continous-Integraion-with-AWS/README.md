@@ -266,6 +266,7 @@ git push origin ci-aws
 - Go to the Systems Manager Service 
 - In Application Management section -> Click on `Parameter Store`
 - Click on `Create Parameter`
+- Create 5 parameters as per details shown below
 
 ```
 Name: Organization
