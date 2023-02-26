@@ -513,7 +513,7 @@ Add deploy Stage
 Click on Skip Deploy Stage 
 We will do this later by editing the pipeline
 ```
-![GitHub Light](./snaps/create_piepline4.png)
+![GitHub Light](./snaps/create_pipeline4.png)
 
 
 - Click on Create Pipeline 
