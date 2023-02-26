@@ -4,11 +4,11 @@
 
 - In Agile SDLC, developer makes regular code changes (commits/pull requests) and this changes need to be build and tested, also the build artifacts and test reports are generated. 
 
-- After the artifacts are generated and before the application is deployed to the production systems, it should pass from the various integraion and performance testing.
+- After the artifacts are generated and before the application is deployed to the production systems, it should pass from the various integraion and performance tests.
 
 - This testing is performed on the TEST/PRE-PROD/STAGING environments.
 
-- Afte the test reports get evaulated, manual approval is gievn for the application depoyment on production environment.
+- Afte the test reports get evaulated, manual approval is given for the application depoyment on production environment.
 
 
 ### Objectives:
