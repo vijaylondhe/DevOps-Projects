@@ -300,15 +300,20 @@ Value: <enter-the-token-genrated-from-codeartifact>
 
 ![GitHub Light](./snaps/ssm_parameter.png)
 
+
 ### Step 5: Setup CodeBuild for Sonarqube Code Analysis:
 
-modify code build role to access the parameter store
-create iam policy and attach to the role 
-create codebuild project 
-add buidlspec file 
-set cloudwatch logs for the build 
-
-- Buildspec file for sonarqube code analysis
+- Go to CodeBuild Service 
+- Craete CodeBuild Project
+  - ProjectName: vprofile-sonar-build
+  - Source: CodeCommit
+  - Branch: ci-aws
+  - Environment: Ubuntu
+  - Runtime: Standard
+  - Image:aws/codebuild/standard:5.0
+  - Create New service role
+  - Role Name: codebuild-vprofile-sonar-build-service-role
+  - BuildSpec: Insert Build Command
 
 ```
 version: 0.2 
@@ -318,7 +323,7 @@ env:
     HOST: HOST
     Organization: Organization
     Project: Project
-    CODEARTIFACT_AUTH_TOKEN: CODEARTIFACT_AUTH_TOKEN
+    CODEARTIFACT_AUTH_TOKEN: codeartifact-token
 phases:
   install:
     runtime-versions:
@@ -349,7 +354,56 @@ phases:
       - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
 ```
 
+- Logs-> Cloudwatch -> GroupName: `vprofile-build-logs`, Stream Name: `sonar-logs`
+- Click on Create Build Project
+ 
+
+![GitHub Light](./snaps/create_build_project.png)
+
+- Go to the IAM
+- Create IAM policy for access to SSM Paramters
+  - Policy Name: `vprofile-parameter-store-policy`
+  - Add the permission as per below 
+
+![GitHub Light](./snaps/policy1.png)
+
+![GitHub Light](./snaps/policy2.png)
+
+- Edit the Role: `codebuild-vprofile-sonar-build-service-role`
+- Add the permission -> attach policy `vprofile-parameter-store-policy`
+
+![GitHub Light](./snaps/modify_role.png)
+
+
+- Go to the CodeBuild service 
+- Select Project: `vprofile-sonar-build`
+- Click on `Start Build`
+
+![GitHub Light](./snaps/build_started.png)
+
+- Click on Build Logs, you will see the build is started 
+
+![GitHub Light](./snaps/build_logs.png)
+
+- Once the build process is completed check the Phase details 
+
+![GitHub Light](./snaps/phase_details.png)
+
+
 ### Step 6: Setup CodeBuild for Build Artifact:
+
+- Go to CodeBuild Service 
+- Craete CodeBuild Project
+  - ProjectName: vprofile-build-artifact
+  - Source: CodeCommit
+  - Branch: ci-aws
+  - Environment: Ubuntu
+  - Runtime: Standard
+  - Image:aws/codebuild/standard:5.0
+  - Create New service role
+  - Role Name: codebuild-vprofile-build-artifact-service-role
+  - BuildSpec: Insert Build Command
+
 
 - Buildspec file to build the artifact and store in code artifact
 
@@ -357,7 +411,7 @@ phases:
 version: 0.2
 env:
   parameter-store:
-    CODEARTIFACT_AUTH_TOKEN: CODEARTIFACT_AUTH_TOKEN
+    CODEARTIFACT_AUTH_TOKEN: codeartifact-token
 phases:
   install:
     runtime-versions:
@@ -380,15 +434,153 @@ artifacts:
   discard-paths: yes
 ```
 
-### Step 7: Setup CodePipeline:
+- Logs-> Cloudwatch -> GroupName: `vprofile-build-logs`, Stream Name: `codeartifact-logs`
+- Click on Create Build Project
 
-create pipeline 
-source - code commit and repo name 
-add build artifact stage 
-create piepline 
-add stage for sonarqube analysis
-create bucket with folder 
-add stage for deploy to s3
-extact the artifact 
-setup notification 
-run the pipeline 
+![GitHub Light](./snaps/code_build_artifact.png)
+
+- Edit the IAM Role: 
+  - Go to the IAM Service 
+  - Edit the Role: `codebuild-vprofile-build-artifact-service-role`
+  - Add the permission -> attach policy `vprofile-parameter-store-policy`
+
+![GitHub Light](./snaps/role_edit.png)
+
+
+- Go to the CodeBuild service 
+- Select Project: `vprofile-build-artifact`
+- Click on `Start Build`
+
+![GitHub Light](./snaps/build_started2.png)
+
+- Click on Build Logs, you will see the build is started 
+
+![GitHub Light](./snaps/buid_logs2.png)
+
+- Once the build process is completed check the Phase details 
+
+![GitHub Light](./snaps/phase_details2.png)
+
+
+### Step 7: Setup CodePipeline and SNS Notification:
+
+- Create SNS topic and subscription for pipeline notification 
+- Go to SNS service
+  - Create Topic: `vprofile-topic`
+
+![GitHub Light](./snaps/sns_topic.png)
+
+  - Create Subscription
+  - Protocol: `Email`
+  - Endpoint: `<your_email_id>`
+
+![GitHub Light](./snaps/sns_subscription.png)
+
+
+- Go to the CodePipeline service 
+- Create Pipeline 
+
+```
+Pipeline Name: vprofile-pipeline
+Service Role: Create New Service Role
+Click on Next 
+```
+
+![GitHub Light](./snaps/create_piepline1.png)
+
+```
+Add Source Stage
+Source Provider: AWS CodeCommit
+Repository Name: vprofile-code-repo
+Branch Name: ci-aws
+Change detection options: Amazon Cloudwatch Events 
+```
+
+![GitHub Light](./snaps/create_piepline2.png)
+
+
+```
+Add Build Stage
+Build Provider: AWS CodeBuild
+Project Name: vprofile-build-artifact
+Build Type: Single Build 
+```
+
+![GitHub Light](./snaps/create_piepline3.png)
+
+
+```
+Add deploy Stage
+Click on Skip Deploy Stage 
+We will do this later by editing the pipeline
+```
+![GitHub Light](./snaps/create_piepline4.png)
+
+
+- Click on Create Pipeline 
+- You will see the pipeline is created and started the execution
+- Stop the execution of pipeline 
+
+![GitHub Light](./snaps/pipeline_created_stop_execution.png)
+
+
+#### Add Test stage for Sonarcode Analysis
+
+- Click on `Edit`
+- In Add stage give the stage name as `Test`
+
+![GitHub Light](./snaps/add_test_stage.png)
+
+
+- In Edit Action add the below details 
+```
+Action Name: Sonarqube-analysis
+Action Provider: AWS CodeBuild
+Input Artifact: Source Artifact
+Project Name: vprofile-sonar-build
+Build Type: Single Build 
+Click on Create
+```
+
+![GitHub Light](./snaps/sonar_analysis_stage.png)
+
+
+#### Add Stage for Deploy to S3 (To upload build artifact in S3)
+
+- After the Build Stage add the New stage 
+
+![GitHub Light](./snaps/edit_deploy_to_s3.png)
+
+- In Edit Action add the below details 
+```
+Action Name: Deploy-to-s3
+Action Provider: Amazon S3
+Input Artifact: Build Artifact
+Bucket: vprofile-artifact-bukcet-815
+Deployment Path: pipeline-artifacts
+Select Checkbox for Extract file before deploy
+Click on Done
+```
+
+![GitHub Light](./snaps/deploy_to_s3_stage.png)
+
+- Save the Pipeline 
+
+- In Pipeline, click on Settings -> CodePipeline -> Notifications.
+- We need to setup the notification to our pipeline  
+- Provide the topic name 
+
+
+### Step 8: Validate and Run the Pipeline:
+
+- Click On Pipeline -> `vprofile-pipeline`
+- Click on Release Change 
+- This will trigger the pipeline. 
+- After the pipeline completes, go to the S3 bucket and check artifact is uploaded 
+- Open sonarcloud project and check reports are generated for 'vprofile-sonar-cloud-project'
+
+![GitHub Light](./snaps/sonarcloud_status.png)
+
+
+
+
