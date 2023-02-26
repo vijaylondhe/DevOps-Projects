@@ -182,7 +182,7 @@ git push --tags
 
 ![GitHub Light](./snaps/connect_repo1.png)
 
-![GitHub Light](./snaps/connect_repo1.png)
+![GitHub Light](./snaps/connect_repo2.png)
 
 
 - Above commands we need to execute on our local machine 
@@ -194,7 +194,7 @@ git push --tags
   - Attach Policy: `AWSCodeArtifactAdminAccess`
   - Review and Create User
 - Go to the user
-- 
+  - Under the security credentials, generate the access keys for the user 
 
 - Login to the local machine
   - Install AWS CLI if not installed 
