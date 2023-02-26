@@ -40,5 +40,8 @@ Setup the Continuous delivery pipeline with jenkins to fetch the latest docker i
 
 ### Architecture:
 
+![GitHub Light](./snaps/pro-07-cd-with-jenkins.jpg)
+
+
 ### Flow of Execution:
 
