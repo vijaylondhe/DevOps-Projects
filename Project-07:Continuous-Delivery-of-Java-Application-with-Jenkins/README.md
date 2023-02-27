@@ -45,3 +45,20 @@ Setup the Continuous delivery pipeline with jenkins to fetch the latest docker i
 
 ### Flow of Execution:
 
+1. Update the github webhook with the Jenkins new IP address.
+2. Copy Docker files to our repo.
+3. Prepare two separate Jenkinsfile for staging and prod in source code.
+4. AWS Steps:
+   - IAM, ECR Repo Setup
+5. Jenkins Steps: 
+   - Install the plugins
+     - Amazon ECR
+     - Docker, Docker Build and Publish
+     - Pipeline: aws steps
+6. Install Docker Engine and AWS CLI on Jenkins Instance.
+7. Write Jenkinsfile for Build and Publish the docker image to ECR.
+8. ECS Setup:
+   - Cluster, Task Defination, Service
+9. Update Jenkinsfile with code Deploy docker image to ECS.
+10. Repeat the steps for prod ECS cluster.
+11. Promoting docker image for prod.  
