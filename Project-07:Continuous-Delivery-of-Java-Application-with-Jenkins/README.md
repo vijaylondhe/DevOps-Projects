@@ -72,3 +72,39 @@ Setup the Continuous delivery pipeline with jenkins to fetch the latest docker i
 10. Repeat the steps for prod ECS cluster.
 
 11. Promoting docker image for prod.  
+
+
+### Step 1: Create Separate Branch in Github and Update the Webhook:
+
+- Please refer below github repository
+
+```
+https://github.com/vijaylondhe/vprofileproject-complete.git
+```
+- Select docker branch 
+- Download Docker-files folder to your local machine 
+
+- Create New branch in our existing repo
+
+```
+git checkout ci-jenkins
+git checkout -b cicd-jenkins
+```
+
+- Copy the Docker-files folder to the repo 
+- Create two separate directories for staging and production environment and copy the existing `Jenkinsfile` in it.
+
+```
+mkdir StagePipeline/ ProdPipeline/
+cp Jenkinsfile StagePipeline/
+cp Jenkinsfile ProdPipeline/
+git rm Jenkinsfile
+```
+
+- Add the new files and commit to repository on new branch.
+
+```
+git add .
+git commit -m "added cicd-jenkins branch"
+git push origin cicd-jenkins
+```
