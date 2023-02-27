@@ -105,3 +105,68 @@ git add .
 git commit -m "added cicd-jenkins branch"
 git push origin cicd-jenkins
 ```
+
+
+### Step 2: Create IAM user and ECR: 
+
+- Create IAM User:
+  - Go to the IAM service 
+  - Click on Create User
+  - User Name: `cicdjenkins`
+  - Set Permissions: Attach existing policies directly `AmazonEC2ContainerRegistryFullAccess`, `AmazonECS_FullAccess`
+  - Download Access Key ID and Secret Access Key (This will require in later steps to connect to ECR, ECS etc.)
+
+- Create Repository in ECR:
+  - Go to the ECR service
+  - Click on Create Repository
+  - Visibility Setting: Private
+  - Repository Name: `vprofileappimg`
+  - Click on Create Repository
+  - Note down the repository url.
+
+
+### Step 3: Jenkins Configuration: 
+
+- Install necessary plugins 
+  - Go to the Jenkins Console
+  - Click on Manage Jenkins -> Manage Plugins
+  - Click on Available
+  - Install below mentioned plugins
+
+```
+Docker Pipeline
+CloudBees Docker Build and Publish
+Amazon ECR
+Pipline: AWS Steps
+```
+
+- Setup the AWS Credentials 
+  - Go to the Manage Jenkins 
+  - Click on Manage Credentials
+  - Inside Global Credentials -> Add Credentials
+  - In the Kind -> Select AWS Credentials
+  - ID: `awscreds` 
+  - Description: `awscreds`
+  - Access Key ID: `<access_key_id_of_aws_user>`
+  - Secret Access Key: `<secret_access_key_of_aws_user>`
+
+
+- Install AWS CLI on Jenkins instance
+  - SSH into Jenkins instance
+  - Switch to the root user
+  - Run the below commands
+
+```
+apt update && apt install awscli -y
+```
+
+  - Refer the docker documentation to install the docker on ubuntu `https://docs.docker.com/engine/install/ubuntu/`
+  - Add the jenkins user in docker group, so that we can execute the docker commands from the jenkins.
+
+```
+sudo su - jenkins
+usermod -aG docker jenkins
+id jenkins
+systemctl restart jenkins
+``` 
+
