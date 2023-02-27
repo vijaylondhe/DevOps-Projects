@@ -76,15 +76,12 @@ Setup the Continuous delivery pipeline with jenkins to fetch the latest docker i
 
 ### Step 1: Create Separate Branch in Github and Update the Webhook:
 
-- Please refer below github repository
+- Please this below github repository `https://github.com/vijaylondhe/vprofileproject-complete.git`
 
-```
-https://github.com/vijaylondhe/vprofileproject-complete.git
-```
 - Select docker branch 
 - Download Docker-files folder to your local machine 
 
-- Create New branch in our existing repo
+- Create New branch in our existing repo `https://github.com/vijaylondhe/vprociproject.git`
 
 ```
 git checkout ci-jenkins
