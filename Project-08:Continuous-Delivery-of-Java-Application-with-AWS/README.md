@@ -18,5 +18,6 @@
   | Jenkins Job | AWS CodeBuild |
   | Sonarqube Server | Sonar Cloud |
   | Jenkins Pipeline | AWS CodePipeline |
+  | Tomcat on VM | Elastic Beanstalk |
+  | MySQL on VM | RDS MySQL |
 
-  
