@@ -38,7 +38,7 @@ Setup the Continuous delivery pipeline with AWS to deploy the application on AWS
 
 ### Architecture: 
 
-![GitHub Light](./snaps/pro-08-cicd-aws.jpg)
+![GitHub Light](./snaps/pro-08-cicd-aws1.jpg)
 
 ### Flow of Execution:
 
