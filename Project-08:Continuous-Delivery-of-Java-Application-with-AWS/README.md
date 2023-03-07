@@ -687,6 +687,8 @@ show tables;
 - Create new branch `cd-aws`
 - `git checkout -b cd-aws`
 - Update the maven repository location in settings.xml and pom.xml files and push the code.
+- Go to the CodeArtifact service, select the repository and view connection settings 
+- Copy the repository url.
 
 - `vi pom.xml`
 
