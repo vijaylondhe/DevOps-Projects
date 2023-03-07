@@ -38,7 +38,7 @@ Setup the Continuous delivery pipeline with AWS to deploy the application on AWS
 
 ### Architecture: 
 
-![GitHub Light](./snaps/pro-08-cicd-aws1.jpg)
+![GitHub Light](./snaps/pro-08-cicd-aws2.jpg)
 
 ### Flow of Execution:
 
@@ -616,3 +616,5 @@ Click on Done
 - Open sonarcloud project and check reports are generated for 'vprofile-sonar-cloud-project'
 
 ![GitHub Light](./snaps/sonarcloud_status.png)
+
+
