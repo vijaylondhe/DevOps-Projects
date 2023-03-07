@@ -780,7 +780,7 @@ RDSPASS: SecureString : Value <RDS_Password>
 Project Name: vprofile-selenium-testing
 Source Provider: AWS CodeCommit 
 Repository: vprofile-code-repo
-Branch: cd-aws
+Branch: seleniumAutoScripts
 Environment: Windows Server 2019 
 Runtime: Base 
 Image: 1.0 
