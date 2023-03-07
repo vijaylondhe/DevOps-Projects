@@ -337,7 +337,7 @@ Value: <enter-the-token-genrated-from-codeartifact>
 ![GitHub Light](./snaps/ssm_parameter.png)
 
 
-### Step 5: Setup CodeBuild for Sonarqube Code Analysis:
+### Step 5: Setup CodeBuild Job for Sonarqube Code Analysis:
 
 - Go to CodeBuild Service 
 - Craete CodeBuild Project
@@ -426,7 +426,7 @@ phases:
 ![GitHub Light](./snaps/phase_details.png)
 
 
-### Step 6: Setup CodeBuild for Build Artifact:
+### Step 6: Setup CodeBuild Job for Build Artifact:
 
 - Go to CodeBuild Service 
 - Craete CodeBuild Project
@@ -498,7 +498,7 @@ artifacts:
 ![GitHub Light](./snaps/phase_details2.png)
 
 
-### Step 7: Setup CodePipeline and SNS Notification:
+### Step 7: Setup CodePipeline:
 
 - Create SNS topic and subscription for pipeline notification 
 - Go to SNS service
@@ -618,3 +618,316 @@ Click on Done
 ![GitHub Light](./snaps/sonarcloud_status.png)
 
 
+### Step 9: Setup Elastic Beanstalk Environment:
+
+- Go to the Elastic Beanstalk Service 
+- Create New Application 
+
+```
+Application Name: vprofile-app
+Platform: Tomcat
+Application Code: Sample Application
+Configure more options: 
+Capacity: Load Balanced (Min: 2, Max: 4)
+Security: Virtual machine key pair: Provide Key Pair(vprofile-app-key)
+```
+
+![GitHub Light](./snaps/eb_env.png)
+
+
+### Step 10: Setup MySQL RDS:
+
+- Go to the RDS Service
+- Click on Create Database 
+
+```
+Standard Create 
+Select MySQL DB Engine
+Version: 5.7
+DB Identifier: vprofile-cicd-mysql
+Master Username: admin
+Password: Auto Genearted 
+Instance Configuration: t2.medium
+Connectivity: Select default VPC, create new security group (vprofile-cicd-rds-mysql-sg) 
+Initial DB Name: accounts
+```
+
+![GitHub Light](./snaps/rds_mysql_cicd.png)
+
+
+### Step 11: Initialize MySQL RDS Instance:
+
+- Update security group of RDS instance to provide access to elastic beanstalk instances.
+
+- Add Port 3306 for security group id of elastic beanstalk instances.
+
+![GitHub Light](./snaps/mysql_rds_sg_modified.png)
+
+- Login to the Elastic beanstalk instance 
+- `ssh -i vprofile-app-key ec2-user@x.x.x.x`
+- Execute below commands to initialize the database 
+
+```
+sudo -i
+yum install mysql git -y
+mysql -h <RDS_endpoint> -u <RDS_username> -p<RDS_password>
+show databases;
+git clone https://github.com/vijaylondhe/vprofileproject-complete.git
+cd vprofileproject-all/
+git checkout cd-aws
+cd src/main/resources
+mysql -h <RDS_endpoint> -u <RDS_username> -p<RDS_password> accounts < db_backup.sql
+mysql -h <RDS_endpoint> -u <RDS_username> -p<RDS_password>
+use accounts;
+show tables;
+```
+
+### Step 12: Create New Branch & Update the Code:
+
+- Create new branch `cd-aws`
+- `git checkout -b cd-aws`
+- Update the maven repository location in settings.xml and pom.xml files and push the code.
+
+- `vi pom.xml`
+
+![GitHub Light](./snaps/update_pom_xml_file.png)
+
+- `vi settings.xml`
+
+![GitHub Light](./snaps/update_settings_xml_file.png)
+
+- `git add .`
+- `git commit -m "updated repository location"`
+- `git push origin cd-aws`
+
+![GitHub Light](./snaps/git_push_cd_aws.png)
+
+
+### Step 13: Setup CodeBuild Job for Deploy to Elastic Beanstalk:
+
+- Go to the CodeBuild Service 
+- Create CodeBuild Project for deploying artifact to the elastic beanstalk 
+
+```
+Project Name: vprofile-build-release
+Source Provider: AWS CodeCommit 
+Repository: vprofile-code-repo
+Branch: cd-aws
+Environment: Ubuntu 
+Image:aws/codebuild/standard:5.0
+Use Existing service role which has access to parameter store
+```
+
+- Insert build commands:
+```
+version: 0.2
+env:
+  parameter-store:
+    CODEARTIFACT_AUTH_TOKEN: codeartifact-token
+    dbhost: RDS-Endpoint
+    dbuser: RDSUSER
+    dbpass: RDSPASS
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+    commands:
+      - cp ./settings.xml /root/.m2/settings.xml
+  pre_build:
+    commands:
+      - sed -i "s/jdbc.password=admin123/jdbc.password=$dbpass/" src/main/resources/application.properties
+      - sed -i "s/jdbc.username=admin/jdbc.username=$dbuser/" src/main/resources/application.properties
+      - sed -i "s/db01:3306/$dbhost:3306/" src/main/resources/application.properties
+      - apt-get update
+      - apt-get install -y jq
+      - wget http://www-eu.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+      - tar xzf apache-maven-3.5.4-bin.tar.gz
+      - ln -s apache-maven-3.5.4 maven
+  build:
+    commands:
+      - mvn clean install -DskipTests
+artifacts:
+  files:
+     - '**/*'
+  base-directory: 'target/vprofile-v2'
+```
+
+- Logs-> Cloudwatch -> GroupName: `vprofile-build-logs`, Stream Name: `release-logs`
+- Create Parameter store for RDS Username/Endpoint/Password
+
+```
+RDS-Endpoint: String : Value <RDS_Endpoint>
+RDSUSER: String : Value <RDS_Username>
+RDSPASS: SecureString : Value <RDS_Password>
+```
+
+![GitHub Light](./snaps/ssm_parameter_store_cicd.png)
+
+- Go to the CodeBuild Service 
+- Select the `vprofile-build-release` build project 
+- Click on Build.
+
+
+### Step 14: Setup CodeBuild Job for Selenium Automation Tests:
+
+- Go to the CodeBuild service
+- In this project we will run the Selenium automation scripts and store the artifacts in the S3 bucket.
+- 
+
+```
+Project Name: vprofile-selenium-testing
+Source Provider: AWS CodeCommit 
+Repository: vprofile-code-repo
+Branch: cd-aws
+Environment: Windows Server 2019 
+Runtime: Base 
+Image: 1.0 
+Use Existing service role which has access to parameter store
+```
+- Insert build commands:
+
+```
+version: 0.2
+
+#env:
+#  variables:
+#    PROJECT: AspNetMvcSampleApp
+#   DOTNET_FRAMEWORK: 4.6.1
+phases:
+  build:
+    commands:
+      - Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+      - choco install jdk8 -y
+      - choco install maven -y
+      - choco install googlechrome -y
+      - choco install git -y
+      - mkdir C:\output
+      - Start-Sleep -s 360
+      - cd src\seleniumscripts\
+      - mvn clean test -Dsurefire  -Durl=http://pineapple-env.eba-xvrnrqp3.us-east-1.elasticbeanstalk.com/login -Dusr=admin_vp -Dpass=admin_vp -DsShotPath=C:\\output\\ScrnSht_
+      - cp C:\output\* .
+artifacts:
+  files:
+    - '**/*'
+```
+
+- Make sure to update the elastic beanstalk environemnt url in mvn test command.
+- Artifacts: Type: S3
+- Bucketname: vprofile-cicd-testoutput-vd-815
+- Enable semantic versioning
+- Artifcats packaging: zip
+- Logs-> Cloudwatch -> GroupName: `vprofile-build-logs`, Stream Name: `selenium-logs`
+- Click on Create Build Project 
+- Click on Build. 
+
+
+### Step 15: Setup Complete CI/CD pipeline with CodePipeline:
+
+- Go to the CodeBuild service 
+- Open the Project `vprofile-sonar-build` 
+- Edit the Source Branch to `cd-aws`
+- Save the changes 
+- Go to the Project `vprofile-build-artifact`
+- Edit the Source Branch to `cd-aws`
+- Save the changes 
+
+#### Create CodePipeline: 
+
+- Go to the CodePipeline service
+- Click on Create Pipeline 
+
+- Choose Pipeline Settings: 
+  - Name: vprofile-cicd-pipeline
+  - Create New Service Role 
+  - Click on Next
+
+![GitHub Light](./snaps/codepipeline_settings.png)
+
+- Add Source Stage:
+  - Source Provider: AWS CodeCommit 
+  - Repository Name: vprofile-code-repo
+  - Branch Name: cd-aws
+  - Change Detection Options: Amazon Clodwatch Events 
+  - Output Artifact Format: Codepipeline Default 
+
+![GitHub Light](./snaps/codepipeline_source_stage.png)
+
+- Add Build Stage:
+  - Build Provider: AWS CodeCommit
+  - Project Name: vprofile-build-release
+  - Build Type: Single Build 
+
+![GitHub Light](./snaps/codepipeline_build_stage.png)
+
+- Add Deploy Stage:
+  - Deploy Provider: AWS Elastic Beanstalk
+  - Application Name: vprofile-app
+  - Environment Name: Vprofileapp-env
+
+![GitHub Light](./snaps/codepipeline_deploy_stage.png)
+
+- Create the pipeline 
+- Stop the Execution of pipeline 
+- Add the stages for `vprofile-sonar-build` and `vprofile-build-artifact`
+- Edit the Pipeline  
+- Add the first stage for `CodeAnalysis` after Source
+- Click on + Add Stage 
+
+```
+Name: CodeAnalysis
+Action provider: CodeBuild
+Input artifacts: SourceArtifact
+Project name: vprofile-sonar-build
+```
+  
+- Add the second stage for `BuildAndStore` after CodeAnalysis
+- Click on + Add Stage 
+
+```
+Name: BuildAndStore
+Action provider: CodeBuild
+Input artifacts: SourceArtifact
+Project name: vprofile-build-artifact
+```
+
+- Add the third stage for `DeployToS3` after BuildAndStore
+- Click on + Add Stage 
+
+```
+Name: DeployToS3
+Action provider: Amazon S3
+Input artifacts: BuildArtifact
+Bucket name: vprofile815-build-artifact
+Extract file before deploy
+```
+
+- Edit Build Job `vprofile-build-release` and change the Output Artifact name to `BuildArtifactToBean`
+
+- Edit Deploy stage and change Input artifact to `BuildArtifactToBean`
+
+- After the Deploy Job, add new stage for SoftwareTesting using selenium suite.
+- Click on + Add Stage 
+
+```
+Name: SoftwareTesting
+Action provider: CodeBuild
+Input artifacts: SourceArtifact
+ProjectName: vprofile-selenium-testing
+```
+
+- Click on Save to save the pipeline.
+- Click on `Release Change` to start the pipeline execution.
+
+![GitHub Light](./snaps/codepipeline_status_1.png)
+![GitHub Light](./snaps/codepipeline_status_2.png)
+![GitHub Light](./snaps/codepipeline_status_3.png)
+
+
+### Step 16: Validate the Application:
+
+- Go to the Elastic beanstalk service 
+- Select the Application `vprofile-app`
+- Copy the url of application
+- Open the url and test the url.
+
+![GitHub Light](./snaps/final_output_of_pipeline_url.png)
