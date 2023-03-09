@@ -13,7 +13,7 @@
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro09-ansible-vpc.jpg)
+![GitHub Light](./snaps/pro09-ansible-vpc1.jpg)
 
 
 ### Flow of Execution:
