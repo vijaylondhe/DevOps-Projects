@@ -37,7 +37,7 @@
 - Click on Launch instance
   - Instane Name: ansible-control-plane
   - AMI: Ubuntu 20.04
-  - Key Pair: ansible-control-plane
+  - Key Pair: Create New, Name: ansible-control-plane
   - VPC: default
   - Security Group: Port 22 Access to MyIP
   - Userdata: 
@@ -45,6 +45,27 @@
   #!/bin/bash
   apt update
   apt install ansible -y 
+  apt install awscli -y 
   ```
 
-- 
+- Create IAM Role:
+  - Go to IAM Service
+  - Create Role 
+  - Trusted entity type: AWS Service 
+  - Use Case: EC2
+  - Add Permissions: AdministratorAccess
+  - Role Name: ansible-admin-role
+  - Click on Create Role
+
+- Attach Role to EC2 instance.
+  - Go to the EC2 service 
+  - Select the EC2 instance
+  - Go to Actions -> Security -> Modify IAM Role 
+  - Choose ansible-admin-role
+  - Click on Update IAM Role 
+
+- Log in to the EC2 instance and verify the installation 
+  - Check IAM role is attached or not  
+  - Run the command `aws sts get-caller-identity` 
+  - Check ansible is installed or not 
+  - Run the command `ansible --version`
