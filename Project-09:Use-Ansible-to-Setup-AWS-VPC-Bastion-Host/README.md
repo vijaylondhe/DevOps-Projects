@@ -30,3 +30,21 @@
 - Site.yml to call both playbook at once
 
 
+### Step 1: Create EC2 insatnce for Ansible and IAM Role: 
+
+- Login to AWS account
+- Go to EC2 service 
+- Click on Launch instance
+  - Instane Name: ansible-control-plane
+  - AMI: Ubuntu 20.04
+  - Key Pair: ansible-control-plane
+  - VPC: default
+  - Security Group: Port 22 Access to MyIP
+  - Userdata: 
+  ```
+  #!/bin/bash
+  apt update
+  apt install ansible -y 
+  ```
+
+- 
