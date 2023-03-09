@@ -69,3 +69,62 @@
   - Run the command `aws sts get-caller-identity` 
   - Check ansible is installed or not 
   - Run the command `ansible --version`
+
+
+### Step 2: Create Sample Playbooks:
+
+- Login to EC2 instance
+- Install boto packages 
+```
+apt install python3-boto -y
+apt install python3-boto3 -y
+apt install python3-botocore -y
+```
+
+- Create separate directory for playbooks 
+
+```
+mkdir vpc-stack-vprofile
+cd vpc-stack-vprofile
+```
+
+- Create sample playbook
+- `vim test-aws.yml`
+
+```
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: sample keypair 
+      ec2_key:
+       name: my-keypair
+       region: us-east-1 
+```
+
+- Run the playbook, this will create the key pair 
+- `ansible-playbook test-aws.yml`
+
+- Store the key in file using copy module 
+- `vim test-aws.yml`
+```
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: create sample key 
+      ec2_key: 
+        name: sample-key
+        region: us-east-1
+      register: keyout
+
+    - debug:
+        var: keyout 
+
+    - name: store login key 
+      copy: 
+        content: "{{keyout.key.private_key}}"
+        dest: ./sample-key.pem
+      when: keyout.changed
+
+```
