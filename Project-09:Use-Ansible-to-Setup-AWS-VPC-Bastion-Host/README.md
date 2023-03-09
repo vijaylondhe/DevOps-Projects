@@ -105,7 +105,9 @@ cd vpc-stack-vprofile
 - Run the playbook, this will create the key pair 
 - `ansible-playbook test-aws.yml`
 
-- Store the key in file using copy module 
+- Go to the AWS console in EC2 serive 
+- Click on Key Pair and delete the sample-key 
+- We will store the key in file using copy module 
 - `vim test-aws.yml`
 ```
 - hosts: localhost
