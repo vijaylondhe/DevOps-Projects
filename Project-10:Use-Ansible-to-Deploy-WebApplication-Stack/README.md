@@ -104,7 +104,7 @@
 
 ### Step 3: Create Playbook for EC2 stack:
 
-#### Setup variable files and key pair for the instance
+#### 3.1 Setup variable files and key pair for the instance
 
 - Locate the AMI ID which is required for EC2 instances.
 - Go to the `https://cloud-images.ubuntu.com/locator/` website.
@@ -161,7 +161,7 @@ mysql_ami: ami-0263e4deb427da90e
 ![GitHub Light](./snaps/vprostack_key_pair_playbook.png)
 
 
-#### Create Security Groups for Load Balancer and EC2 Instances:
+#### 3.2 Create Security Groups for Load Balancer and EC2 Instances:
 
 - Add `vars/output_vars` file inside the playbook
 - Add Security Group for Load Balancer
