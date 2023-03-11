@@ -159,3 +159,58 @@ mysql_ami: ami-0263e4deb427da90e
 - `ansible-playbook vpro-ec2-stack.yml`
 
 ![GitHub Light](./snaps/vprostack_key_pair_playbook.png)
+
+
+#### Create Security Groups for Load Balancer and EC2 Instances:
+
+- Add `vars/output_vars` file inside the playbook
+- Add Security Group for Load Balancer
+- Note: If we execute the playbook multiple times, ec2_group module will update the security group rules everytime, by default it is not idempotent, to avoid this add `purge_rule: no` option in ec2_group module.
+
+
+- vi vpro-ec2-stack.yml
+```
+    - name: Create Security Group for Load Balancer
+      ec2_group:
+        name: vproELB-sg
+        description: Allow port 80 from everywhere and all port within sg
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+      register: vproELBSG_out
+
+    - name: Create Security Group for Vprofile stack
+      ec2_group:
+        name: vproStack-sg
+        description: Allow port 80 from ELB SG and all port within sg
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+        purge_rules: no
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            group_id: "{{vproELBSG_out.group_id}}"
+
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            group_id: "{{BastionSGid}}"
+      register: vproStackSG_out
+
+    - name: Update Security Group with its own sg id
+      ec_group:
+        name: vproStack-sg
+        description: allow all ports within the sg
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+        purge_rules: no
+        rules:
+          - proto: all
+            group_id: "{{vproStackSG_out.group_id}}"
+
+```
