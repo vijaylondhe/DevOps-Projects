@@ -1,4 +1,4 @@
-# Project-10: Use Ansible to Deploy Web Application Stack
+# Project-10: Use Ansible to Deploy Web Application Stack on AWS
 
 ### Objective:
 
@@ -11,7 +11,6 @@
   - RabbitMQ
   - Tomcat
   - Nginx 
-
 
 ### Flow of Execution:
 - Login to the AWS
@@ -68,3 +67,24 @@
   - Run the command `aws sts get-caller-identity` 
   - Check ansible is installed or not 
   - Run the command `ansible --version`
+
+
+### Step 2: Setup New Branch and Site.yml file: 
+
+- Pull the code from the Github
+- git clone https://github.com/vijaylondhe/ansible-aws-vpc.git
+- Create new branch `vprofile-stack`
+  - git checkout -b vprofile-stack
+  - git branch --all
+- Move the content of `vars/bastion_setup` file to `vpc_setup` file
+- Delete the `bastion_setup` file 
+- Create new file `site.yml`
+```
+---
+- import_playbook: vpc-setup.yml
+- import_playbook: bastion-instance.yml
+```
+- Commit and Push the code to the GitHub
+
+
+
