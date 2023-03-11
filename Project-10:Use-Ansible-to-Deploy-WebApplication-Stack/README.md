@@ -69,7 +69,7 @@
   - Run the command `ansible --version`
 
 
-### Step 2: Setup New Branch and Site.yml file: 
+### Step 2: Setup New Branch and Create VPC: 
 
 - Pull the code from the Github
 - git clone https://github.com/vijaylondhe/ansible-aws-vpc.git
@@ -78,7 +78,8 @@
   - git branch --all
 - Move the content of `vars/bastion_setup` file to `vpc_setup` file
 - Delete the `bastion_setup` file 
-- Create new file `site.yml`
+- Create new file `site.yml`, import the vpc and bastion playbook in it.
+
 ```
 ---
 - import_playbook: vpc-setup.yml
@@ -86,5 +87,75 @@
 ```
 - Commit and Push the code to the GitHub
 
+- Run the playbook
+- `ansible-playbook site.yml`
+- This will create VPC with all its component and bastion host.
+- This will also create the `bastion-key.pem` file for bastion host access and `vars/output_vars` file for the output.
+- Make sure to ignore key file while pushing our code to github.
+- Create git ignore file, add .pem files and push to the github.
+- vi .gitignore
+```
+*.pem
+```
+- git add .
+- git commit -m "ignore keys"
+- git push origin vprofile-stack
 
 
+### Step 3: Create Playbook for EC2 stack:
+
+#### Setup variable files and key pair for the instance
+
+- Locate the AMI ID which is required for EC2 instances.
+- Go to the `https://cloud-images.ubuntu.com/locator/` website.
+- Search for Ubuntu 18.04 image for AWS cloud `us-east-1` region.
+- Copy the Image ID in below variable file.
+- We will be using same AMI for all the EC2 instances.
+- Create new variable file 
+- `vi vars/vprostacksetup`
+```
+nginx_ami: ami-0263e4deb427da90e
+tomcat_ami: ami-0263e4deb427da90e
+memcache_ami: ami-0263e4deb427da90e
+rmq_ami: ami-0263e4deb427da90e
+mysql_ami: ami-0263e4deb427da90e
+```
+
+- Create new file for playbook
+- `vi vpro-ec2-stack.yml`
+```
+- name: Setup Vprofile Stack
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: Import VPC setup variables
+      include_vars: vars/vpc_setup
+
+    - name: Import Vprofile setup variable
+      include_vars: vars/vprostacksetup
+
+    - name: Create Key pair
+      ec2_key:
+        name: vprokey
+        region: "{{region}}"
+      register: vprokey_out
+
+    - name: Save private key into file loginkey_vpro.pem
+      copy:
+        content: "{{vprokey_out.key.private_key}}"
+        dest: "./loginkey_vpro.pem"
+        mode: 0600
+      when: vprokey_out.changed
+```
+ 
+- Push the code to the github 
+- git add .
+- git commit -m "added playbook and var files for vprofile stack"
+- git push origin vprofile-stack
+
+
+- Run the playbook
+- `ansible-playbook vpro-ec2-stack.yml`
+
+![GitHub Light](./snaps/vprostack_key_pair_playbook.png)
