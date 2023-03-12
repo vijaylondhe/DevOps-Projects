@@ -399,8 +399,14 @@ sudo pip3 install ansible
 
 #### 3.6 Create Dynamic inventory for instances:
 
-- create new folder `provision-stack/group_vars`
+- Create new folder `provision-stack/group_vars`
+
+- Create empty file `inventory-vpro` inside `provision-stack` for dynamic inventory.
+
+- Create empty file `hostsip` inside `provision-stack/group_vars` to store the ip address information of all ec2 instances.
+
 - Edit the playbook and add the dynamic inventory file with all the details of instances.
+
 - Also copy access file inside the `provision-stack` folder
 
 - vi vpro-ec2-stack.yml
@@ -466,3 +472,21 @@ sudo pip3 install ansible
           #ansible_python_interpreter=/usr/bin/python3
 
 ```
+
+- Push the code to the github 
+- git add .
+- git commit -m "added dynamic inventory for vprofile stack"
+- git push origin vprofile-stack
+
+
+- Run the playbook
+- `ansible-playbook vpro-ec2-stack.yml`
+
+- This will create the hostsip file and inventory-vpro file 
+- Push back code to the github for this both the files 
+- git status 
+- git add .
+- git commit -m "added inventory file"
+- git push origin vprofile-stack
+
+
