@@ -203,7 +203,7 @@ mysql_ami: ami-0263e4deb427da90e
       register: vproStackSG_out
 
     - name: Update Security Group with its own sg id
-      ec_group:
+      ec2_group:
         name: vproStack-sg
         description: allow all ports within the sg
         region: "{{region}}"
@@ -212,5 +212,257 @@ mysql_ami: ami-0263e4deb427da90e
         rules:
           - proto: all
             group_id: "{{vproStackSG_out.group_id}}"
+
+```
+
+- Push the code to the github 
+- git add .
+- git commit -m "added sg for vprofile stack"
+- git push origin vprofile-stack
+
+
+- Run the playbook
+- `ansible-playbook vpro-ec2-stack.yml`
+
+
+#### 3.3 Upgrade the Ansible Version from 2.9 to 2.10:
+```
+sudo apt remove ansible -y 
+sudo apt install python3-pip -y
+sudo pip3 install ansible 
+```
+
+#### 3.4 Add the module for EC2 instances in playbook:
+
+- Add the ec2 module to create ec2 instances for nginx, tomcat, memcached, rabbitmq and mysql.
+
+- vim vpro-ec2-stack.yml
+```
+    - name: Creating Nginx web01
+      ec2:
+        key_name: vprokey
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{nginx_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "web01"
+          Project: Vprofile
+          Owner: DevOps Team
+        exact_count: 1
+        count_tag:
+          Name: "web01"
+          Project: Vprofile
+          Owner: DevOps Team
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: app01_out
+
+
+    - name: Creating tomcat app01
+      ec2:
+        key_name: vprokey
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{tomcat_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "app01"
+          Project: Vprofile
+          Owner: DevOps Team
+        exact_count: 1
+        count_tag:
+          Name: "app01"
+          Project: Vprofile
+          Owner: DevOps Team
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: app01_out
+
+
+    - name: Creating memcache mc01
+      ec2:
+        key_name: vprokey
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{memcache_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "mc01"
+          Project: Vprofile
+          Owner: DevOps Team
+        exact_count: 1
+        count_tag:
+          Name: "mc01"
+          Project: Vprofile
+          Owner: DevOps Team
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: mc01_out
+
+
+    - name: Creating RabbitMQ rmq01
+      ec2:
+        key_name: vprokey
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{rmq_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "rmq01"
+          Project: Vprofile
+          Owner: DevOps Team
+        exact_count: 1
+        count_tag:
+          Name: "rmq01"
+          Project: Vprofile
+          Owner: DevOps Team
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: rmq01_out
+
+
+    - name: Creating Mysql db01
+      ec2:
+        key_name: vprokey
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{mysql_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "db01"
+          Project: Vprofile
+          Owner: DevOps Team
+        exact_count: 1
+        count_tag:
+          Name: "db01"
+          Project: Vprofile
+          Owner: DevOps Team
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: db01_out
+
+    - debug:
+        var: db01_out
+
+```
+
+- Push the code to the github 
+- git add .
+- git commit -m "added ec2 for vprofile stack"
+- git push origin vprofile-stack
+
+
+- Run the playbook
+- `ansible-playbook vpro-ec2-stack.yml`
+
+
+#### 3.5 Add ELB module in Playbook:
+
+- vim vpro-ec2-stack.yml
+
+```
+    - local_action:
+        module: ec2_elb_lb
+        name: "vprofile-elb"
+        region: "{{region}}"
+        state: present
+        instance_ids:
+          - "{{ web01_out.tagged_instances[0].id }}"
+        purge_instance_ids: true
+        security_group_ids: "{{ vproELBSG_out.group_id }}"
+        subnets:
+          - "{{ pubsub1id }}"
+          - "{{ pubsub2id }}"
+          - "{{ pubsub3id }}"
+        listeners:
+          - protocol: http # options are http, https, ssl, tcp
+            load_balancer_port: 80
+            instance_port: 80
+```
+
+- Push the code to the github 
+- git add .
+- git commit -m "added elb for vprofile stack"
+- git push origin vprofile-stack
+
+
+- Run the playbook
+- `ansible-playbook vpro-ec2-stack.yml`
+
+
+
+#### 3.6 Create Dynamic inventory for instances:
+
+- create new folder `provision-stack/group_vars`
+- Edit the playbook and add the dynamic inventory file with all the details of instances.
+- Also copy access file inside the `provision-stack` folder
+
+- vi vpro-ec2-stack.yml
+
+```
+    - name: Insert/Update Hosts IP & Name in file provision-stack/group_vars/hostsip
+      blockinfile:
+        path: provision-stack/group_vars/hostsip
+        block: |
+          web01_ip: {{ web01_out.tagged_instances[0].private_ip }}
+          app01_ip: {{ app01_out.tagged_instances[0].private_ip }}
+          rmq01_ip: {{ rmq01_out.tagged_instances[0].private_ip }}
+          mc01_ip: {{ mc01_out.tagged_instances[0].private_ip }}
+          db01_ip: {{ db01_out.tagged_instances[0].private_ip }}
+    
+
+    - name: Copy login key to provision_stack directory
+      copy:
+        src: loginkey_vpro.pem
+        dest: provision-stack/loginkey_vpro.pem
+        mode: '0400'
+
+
+    - name: Insert/Update Inventory file provision-stack/inventory-vpro
+      blockinfile:
+        path: provision-stack/inventory-vpro
+        block: |
+          web01 ansible_host={{ web01_out.tagged_instances[0].private_ip }}
+          app01 ansible_host={{ app01_out.tagged_instances[0].private_ip }}
+          rmq01 ansible_host={{ rmq01_out.tagged_instances[0].private_ip }}
+          mc01 ansible_host={{ mc01_out.tagged_instances[0].private_ip }}
+          db01 ansible_host={{ db01_out.tagged_instances[0].private_ip }}
+          cntl ansible_host=127.0.0.1 ansible_connection=local
+          
+          [websrvgrp]
+          web01
+          
+          [appsrvgrp]
+          app01
+          
+          [rmqsrvgrp]
+          rmq01
+          
+          [mcsrvgrp]
+          mc01
+          
+          [dbsrvgrp]
+          db01
+          
+          [control]
+          cntl
+          
+          [stack_inst:children]
+          websrvgrp
+          appsrvgrp
+          rmqsrvgrp
+          mcsrvgrp
+          dbsrvgrp
+          
+          [stack_inst:vars]
+          ansible_user=ubuntu
+          ansible_ssh_private_key_file=loginkey_vpro.pem
+          #ansible_python_interpreter=/usr/bin/python3
 
 ```
