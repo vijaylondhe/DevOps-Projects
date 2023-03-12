@@ -12,6 +12,11 @@
   - Tomcat
   - Nginx 
 
+### Architecture:
+
+![GitHub Light](./snaps/pro-10-ansible-deploy-webapp.jpg)
+
+
 ### Flow of Execution:
 - Login to the AWS
 - Create EC2 instance to run ansible playbook
