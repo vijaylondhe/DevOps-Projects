@@ -491,3 +491,214 @@ sudo pip3 install ansible
   - git push origin vprofile-stack
 
 
+### Step 4: Setup Configuration for EC2 instances:
+
+#### 4.1 Move Ansible Controller to vprofile-vpc
+
+- Ansible control node is launched in default vpc, so it is not able to connect to the instances launched in Vprofile-vpc.
+
+- There are two options available to make connectivity between ansible control node and EC2 instances launched in Vprofile-vpc.
+  - Configure VPC Peering between default vpc and Vprofile-vpc.
+  - Create AMI of ansible control node and create the new instance from that AMI in Vprofile-vpc.
+
+- We will choose the second option.
+
+- Create AMI of ansible control node:
+  - Select the ansible control node instance in EC2 service 
+  - Click on Actions -> Image -> Create Image 
+  - Image Name: controller-ami
+
+- Launch the instance from AMI:
+  - Go to EC2 service 
+  - Click on AMI's option inside Image
+  - Select the AMI and click on Launch
+  - Instance type: t2.medium
+  - VPC: Vprofile-vpc
+  - Subnet: vprofile_pubsub2
+  - Security Group: Bastion-host-sg
+  - Key Pair: ansible-control-node
+
+- Terminate the old ansible control node.
+- Login to the new ansible control node and test the ssh connection with any one EC2 instance of vprofile stack.
+
+  - ssh -i ansible-control-plane ubuntu@<public_ip_of_ansible_control_node_instance>
+  - ansible --version
+  - ssh -i loginkey_vpro.pem ubuntu@<private_ip_of_ec2_instance_vpro_stack>
+
+
+
+#### 4.2 Create Variable/Template & Inventory files:
+
+- Create variable file `dbsrvgrp` inside the `provision-stack/group_vars`
+- vi dbsrvgrp
+```
+dbuser: admin
+dbpass: admin123
+dbname: accounts
+```
+
+- We need to create template files for `application.properties` and `ngnix` configuration file.
+
+- Create `templates` directory inside the `provision-stack` directory.
+
+- Create `application.j2` file inside the `templates` directory
+
+- vi application.j2
+```
+#JDBC Configutation for Database Connection
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://db01:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+jdbc.username=admin
+jdbc.password=admin123
+
+#Memcached Configuration For Active and StandBy Host
+#For Active Host
+memcached.active.host=mc01
+memcached.active.port=11211
+#For StandBy Host
+memcached.standBy.host=127.0.0.2
+memcached.standBy.port=11211
+
+#RabbitMq Configuration
+rabbitmq.address=rmq01
+rabbitmq.port=5672
+rabbitmq.username=test
+rabbitmq.password=test
+
+#Elasticesearch Configuration
+elasticsearch.host =192.168.1.85
+elasticsearch.port =9300
+elasticsearch.cluster=vprofile
+elasticsearch.node=vprofilenode
+```
+
+- Create `nginxvpro.j2` file inside the `templates` directory
+- vi nginxvpro.j2
+```
+upstream vproapp {
+ server app01:8080;
+}
+server {
+  listen 80;
+location / {
+  proxy_pass http://vproapp;
+}
+}
+```
+
+- Create `ansible.cfg` file inside the `provision-stack` directory.
+- vi ansible.cfg
+```
+[defaults]
+inventory = inventory-vpro
+host_key_checking = False
+forks = 5
+log_path = ./ansible.log
+timeout = 15
+#ask_vault_pass = True
+
+[privilege_escalation]
+become = yes
+become_method = sudo
+become_user = root
+become_pass = False
+
+[ssh_connection]
+retries = 2
+```
+
+
+#### 4.3 Create Master Playbook
+
+- Create `site.yml` file inside the `provision-stack` directory.
+- vi `site.yml`
+```
+- name: Build Artifact ROOT.war & SQL file to be copied in files/ directory
+  import_playbook: build.yml
+
+- name: Set Hosts to Ip MApping in /etc/hosts file of all servers
+  import_playbook: set_host_ip_map.yml
+
+- name: Setup dbserver
+  import_playbook: db.yml
+
+- name: Deploy SQL file on Dbserver
+  import_playbook: dbdeploy.yml
+
+- name: Setup Memcached service
+  import_playbook: memcache.yml
+
+- name: Setup rabbitmq service
+  import_playbook: rabbitmq.yml
+
+- name: Setup Tomcat application server
+  import_playbook: appserver.yml
+
+- name: Setup Nginx webserver
+  import_playbook: web.yml
+```
+
+
+#### 4.3 Create Child Playbooks to Build the artifact 
+
+- Create `files` directory under the `provision-stack` directory.
+
+- Create `test` file inside the `files` directory.
+
+- Create Playbook `build.yml` inside `provision-stack` directory.
+
+- In this playbook we will install the required packages (jdk, maven, git), clone the source code and build the artifact
+
+- Then we will copy the artifact and `db_backup.sql` file which is required to initialize the mysql database.
+
+- Note: This playbook will run on the ansible controller node i.e. locally.
+
+- vi `build.yml`
+```
+- name: Generate artifact, copy artifact & sql file to files directory
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: Install  jdk, maven, git
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - git
+        - openjdk-8-jdk
+        - maven
+
+
+    - name: Clone source code from github
+      git:
+        repo: 'https://github.com/vijaylondhe/vprofileproject-complete.git'
+        dest: ./Vprofile-repo
+        version: vp-rem
+      register: git_status
+
+
+    - name: mvn install command to build artifact
+      command: "mvn install"
+      args:
+        chdir: Vprofile-repo
+      when: git_status.changed
+      register: mvn_info
+
+
+    - name: Copy artifacts to files directory
+      copy:
+        src: "{{item}}"
+        dest: files/ROOT.war
+      with_fileglob: Vprofile-repo/target/*.war
+
+    - name: Copy SQL file to files directory
+      copy:
+        src: Vprofile-repo/src/main/resources/db_backup.sql
+        dest: files/db_backup.sql
+```
+
+
+#### 4.4 Create Hostname IP Mapping Child Playbook
+
