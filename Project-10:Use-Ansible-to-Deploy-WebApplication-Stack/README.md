@@ -474,19 +474,20 @@ sudo pip3 install ansible
 ```
 
 - Push the code to the github 
-- git add .
-- git commit -m "added dynamic inventory for vprofile stack"
-- git push origin vprofile-stack
+  - git add .
+  - git commit -m "added dynamic inventory for vprofile stack"
+  - git push origin vprofile-stack
 
 
 - Run the playbook
 - `ansible-playbook vpro-ec2-stack.yml`
 
-- This will create the hostsip file and inventory-vpro file 
-- Push back code to the github for this both the files 
-- git status 
-- git add .
-- git commit -m "added inventory file"
-- git push origin vprofile-stack
+- Push the code to GitHub:
+  - This will create the hostsip file and inventory-vpro file 
+  - Push back code to the github for this both the files 
+  - git status 
+  - git add .
+  - git commit -m "added inventory file"
+  - git push origin vprofile-stack
 
 
