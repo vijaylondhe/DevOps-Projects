@@ -732,4 +732,75 @@ retries = 2
 - `ssh -i loginkey_vpro.pem ubuntu@web01`
 
 
-#### 4.5 
+#### 4.5 Create Playbook for Database
+
+- Create playbook file `db.yml` inside the the `provision-stack` directory.
+
+- This playbook includes
+  - Install mysql package and its dependencies
+  - Create the database user
+  - Create database `accounts`
+  - Enable the remote logins using `lineinfile` module
+  - Use Ansible `handlers` to restart the mysql service
+
+- vi db.yml
+```
+---
+- name: Setup Mysql with accounts db and remote login
+  hosts: dbsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Installing MySQL service and dependencies
+      package: 
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 86400
+      loop:
+        - mysql-server
+        - mysql-client
+        - python-mysqldb
+        - python3-mysqldb
+        - libmysqlclient-dev
+      ignore_errors: yes
+      tags:
+        - package
+
+- name: Start and enable mysql service
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  tags: 
+    - svc
+
+- name: Creating mysql user 
+  mysql_user:
+    name: "{{dbuser}}"
+    password: "{{dbpass}}"
+    priv: '*.*:ALL'
+    host: '%'
+    state: present
+  
+- name: Creating accounts DB
+  mysql_db:
+    name: "{{dbname}}"
+    state: present
+
+- name: Enable remote login to mysql svc
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+    backup: yes
+  notify:
+    - Restart mysql
+  tags:
+    - conf
+
+handlers:
+  - name: Restart mysql
+    service:
+      name: mysql
+      state: restarted
+```
