@@ -746,7 +746,7 @@ retries = 2
 
 - Push the code to the github 
   - git add .
-  - git commit -m "set_host_ip_map.yml"
+  - git commit -m "added set_host_ip_map.yml"
   - git push origin vprofile-stack
 
 
@@ -883,7 +883,7 @@ handlers:
 
 - Push the code to the github 
   - git add .
-  - git commit -m "dbdeploy.yml"
+  - git commit -m "aded dbdeploy.yml"
   - git push origin vprofile-stack
 
 
@@ -940,7 +940,7 @@ handlers:
 
 - Push the code to the github 
   - git add .
-  - git commit -m "memcache.yml"
+  - git commit -m "added memcache.yml"
   - git push origin vprofile-stack
 
 
@@ -1062,7 +1062,7 @@ handlers:
 
 - Push the code to the github 
   - git add .
-  - git commit -m "rabbitmq.yml"
+  - git commit -m "added rabbitmq.yml"
   - git push origin vprofile-stack
 
 
@@ -1291,3 +1291,82 @@ WantedBy=multi-user.target
         name: tomcat8
         state: restarted
 ```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "added appserver.yml"
+  - git push origin vprofile-stack
+
+#### 4.10 Create Playbook for Nginx
+
+- Create playbook file `web.yml` inside the the `provision-stack` directory.
+- This playbook includes
+  - Install nginx package using `apt` module.
+  - Start and Enable nginx service using `service` module.
+  - Disable default nginx site using `file` module.
+  - Deploy nginx configuration file `nginxvpro.j2` using `template` module.
+  - Create link for vproapp using `file` module.
+  - Using `handlers` restart the nginx service.
+
+- vi web.yml
+```
+---
+- name: Setup Nginx svc
+  hosts: websrvgrp
+  gather_facts: no
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+        cache_valid_time: 86400
+      tags:
+        - package
+
+    - name: Start & ENable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+
+    - name: Disable Nginx default website
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      tags:
+        - conf
+
+
+    - name: Deploy web config file
+      template:
+        src: templates/nginxvpro.j2
+        dest: /etc/nginx/sites-available/vproapp
+      tags:
+        - conf
+
+
+    - name: Enable vproapp website
+      file:
+        src: /etc/nginx/sites-available/vproapp
+        dest: /etc/nginx/sites-enabled/vproapp
+        state: link
+      notify:
+        - Restart Nginx
+      tags:
+        - conf
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "added web.yml"
+  - git push origin vprofile-stack
