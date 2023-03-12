@@ -607,6 +607,10 @@ become_pass = False
 retries = 2
 ```
 
+- Push the code to the github 
+  - git add .
+  - git commit -m "added variables and templates"
+  - git push origin vprofile-stack
 
 #### 4.3 Create Master Playbook
 
@@ -637,6 +641,11 @@ retries = 2
 - name: Setup Nginx webserver
   import_playbook: web.yml
 ```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "added site.yml"
+  - git push origin vprofile-stack
 
 
 #### 4.3 Create Child Playbook to Build the artifact 
@@ -699,6 +708,10 @@ retries = 2
         dest: files/db_backup.sql
 ```
 
+- Push the code to the github 
+  - git add .
+  - git commit -m "added build.yml"
+  - git push origin vprofile-stack
 
 #### 4.4 Create Hostname IP Mapping Child Playbook
 
@@ -730,6 +743,12 @@ retries = 2
 
 - Test the SSH with hostname from the ansible control node 
 - `ssh -i loginkey_vpro.pem ubuntu@web01`
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "set_host_ip_map.yml"
+  - git push origin vprofile-stack
+
 
 
 #### 4.5 Create Playbook for Database
@@ -804,3 +823,244 @@ handlers:
       name: mysql
       state: restarted
 ```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "db.yml"
+  - git push origin vprofile-stack
+
+#### 4.6 Create Playbook for DB Deploy
+
+- Edit `.gitignore` file 
+- vi .gitignore
+```
+*.pem
+*.war
+*.sql
+```
+
+- Push to the GitHub
+  - git add .
+  - git rm --cached provision-stack/Vprofile-repo -f 
+  - git commit -m "test"
+  - git push origin vprofile-stack
+
+
+- Create playbook file `dbdeploy.yml`
+- vi dbdeploy.yml
+```
+---
+- name: Deploy SQL file on accounts db
+  hosts: dbsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Copy SQL to dbsrv
+      copy:
+        src: files/db_backup.sql
+        dest: /tmp/db_backup.sql
+      tags:
+        - deploy
+
+    - name: Restoring DB
+      mysql_db:
+        name: "{{dbname}}"
+        login_user: "{{dbuser}}"
+        login_password: "{{dbpass}}"
+        state: import
+        target: /tmp/db_backup.sql
+      notify:
+        - Restart mysql
+      tags:
+        - deploy
+
+
+  handlers:
+    - name: Restart mysql
+      service:
+        name: mysql
+        state: restarted
+```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "dbdeploy.yml"
+  - git push origin vprofile-stack
+
+
+#### 4.7 Create Playbook for Memcached
+
+- Create playbook file `memcache.yml`
+- This playbook includes
+  - Install memcached package 
+  - Start the memcached service
+  - Enable remote login to memcached using `lineinfile` module
+  - Using Ansible `handlers` restart the memcached service
+
+- vi memcache.yml
+```
+---
+- name: Install Memcache, Start & enable SVC
+  hosts: mcsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Install Memcache
+      apt:
+        name: memcached
+        state: present
+        update_cache: yes
+        cache_valid_time: 86400
+      tags:
+        - package
+
+    - name: Start & Enable Memcache
+      service:
+        name: memcached
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+    - name: Enable remote login to memecache
+      lineinfile:
+        path: /etc/memcached.conf
+        regexp: '^-l '
+        line: '-l 0.0.0.0'
+        backup: yes
+      notify:
+        - Restart memcached
+      tags:
+        - conf
+
+  handlers:
+    - name: Restart memcached
+      service:
+        name: memcached
+        state: restarted
+```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "memcache.yml"
+  - git push origin vprofile-stack
+
+
+#### 4.8 Create Playbook for RabbitMQ
+
+- Create playbook file `rabbitmq.yml`
+- This playbook includes
+  - Install Erlang repository package using `apt` module
+  - Add an Erlang solution public key using `apt_key` module
+  - Install Erlang using `apt` module 
+  - Add apt signing key using `apt_key` module
+  - Install RabbitMQ using `apt` module
+  - Start and Enable RabbitMQ service using `service` module
+  - Configure RabbitMQ setting using `copy` module
+  - Configure RabbitMQ user using `rabbitmq_user` module 
+  - Enable the rabbitmq_management plugin using `rabbitmq_plugin` module 
+  - Use the Ansible `handler` to restart the RabbitMQ service
+
+
+- vi rabbitmq.yml
+```
+---
+- name: Install & Setup RabbitMQ with user
+  hosts: rmqsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Install Erlang Repository Package
+      apt:
+        deb: https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+      tags:
+        - package
+
+    - name: Add an Erlang Solution public Key
+      apt_key:
+        url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+        state: present
+      tags:
+        - package
+
+    - name: Install Erlang
+      apt:
+        name: erlang
+        update_cache: yes
+        cache_valid_time: 86400
+        state: present
+      tags:
+        - package
+
+    - name: Add an Apt signing key, uses whichever key is at the URL
+      apt_key:
+        url: https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+        state: present
+      tags:
+        - package
+
+    - apt_repository:
+        repo: deb https://dl.bintray.com/rabbitmq/debian bionic main
+        state: present
+      tags:
+        - package
+
+    - name: Install Rabbit MQ
+      apt:
+        name: rabbitmq-server
+        state: present
+        update_cache: yes
+      tags:
+        - package
+
+
+    - name: Start & Enable RMQ
+      service:
+        name: rabbitmq-server
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+    - name: Config setup
+      copy:
+        content: |
+          [{rabbit, [{loopback_users, []}]}].
+        dest: /etc/rabbitmq/rabbitmq.config
+      notify:
+        - Restart RMQ
+      tags:
+        - conf
+
+
+    - rabbitmq_user:
+        user: test
+        password: test
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+        tags: administrator
+        state: present
+      notify:
+        - Restart RMQ
+      tags:
+        - conf
+
+
+    - name: Enables the rabbitmq_management plugin
+      rabbitmq_plugin:
+        names: rabbitmq_management
+        state: enabled
+      notify:
+        - Restart RMQ
+      tags:
+        - package
+
+  handlers:
+    - name: Restart RMQ
+      service:
+        name: rabbitmq-server
+        state: restarted
+```
+
+- Push the code to the github 
+  - git add .
+  - git commit -m "rabbitmq.yml"
+  - git push origin vprofile-stack
