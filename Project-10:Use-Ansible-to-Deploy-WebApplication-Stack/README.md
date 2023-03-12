@@ -348,7 +348,7 @@ sudo pip3 install ansible
       register: db01_out
 
     - debug:
-        var: db01_out
+        var: db01_out.tagged_instances[0].id
 
 ```
 
@@ -639,7 +639,7 @@ retries = 2
 ```
 
 
-#### 4.3 Create Child Playbooks to Build the artifact 
+#### 4.3 Create Child Playbook to Build the artifact 
 
 - Create `files` directory under the `provision-stack` directory.
 
@@ -702,3 +702,34 @@ retries = 2
 
 #### 4.4 Create Hostname IP Mapping Child Playbook
 
+- This playbook will be used to create /etc/hosts file on all the EC2 instances including the ansible control node 
+
+- In this playbook, we will use `hostsip` output file which contains ip address details of EC2 instances.
+
+- Create `set_host_ip_map.yml` file inside the `provision-stack` directory.
+
+- vi set_host_ip_map.yml
+
+```
+- name: Set host to ip mapping in /etc/hosts file of all the instances in the stack
+  hosts: all
+  tasks:
+    - name: Import VPC setup Variable
+      include_vars: group_vars/hostsip
+
+    - name: Update hosts file for all the hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {{web01_ip}} web01
+          {{app01_ip}} app01
+          {{rmq01_ip}} rmq01
+          {{mc01_ip}} mc01
+          {{db01_ip}} db01
+```
+
+- Test the SSH with hostname from the ansible control node 
+- `ssh -i loginkey_vpro.pem ubuntu@web01`
+
+
+#### 4.5 
