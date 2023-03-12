@@ -19,10 +19,9 @@
 - Install Boto
 - Setup IAM Role for ansible and attach to EC2
 - Fetch source code from project ansible for AWS
-- Execute VPC playbook
+- Execute VPC playbook and Bastion host playbook
 - Playbook to launch EC2, ELB, Security groups for web application stack
-- Get into VPC
-- Playbooks for web application stack
+- Prepare and execute playbooks for the web application stack
 
 
 ### Step 1: Create EC2 insatnce for Ansible and IAM Role: 
