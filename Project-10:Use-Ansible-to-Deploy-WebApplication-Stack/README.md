@@ -846,7 +846,7 @@ handlers:
   - git push origin vprofile-stack
 
 
-- Create playbook file `dbdeploy.yml`
+- Create playbook file `dbdeploy.yml` inside the the `provision-stack` directory.
 - vi dbdeploy.yml
 ```
 ---
@@ -889,7 +889,7 @@ handlers:
 
 #### 4.7 Create Playbook for Memcached
 
-- Create playbook file `memcache.yml`
+- Create playbook file `memcache.yml` inside the the `provision-stack` directory.
 - This playbook includes
   - Install memcached package 
   - Start the memcached service
@@ -946,7 +946,7 @@ handlers:
 
 #### 4.8 Create Playbook for RabbitMQ
 
-- Create playbook file `rabbitmq.yml`
+- Create playbook file `rabbitmq.yml` inside the the `provision-stack` directory.
 - This playbook includes
   - Install Erlang repository package using `apt` module
   - Add an Erlang solution public key using `apt_key` module
@@ -1064,3 +1064,230 @@ handlers:
   - git add .
   - git commit -m "rabbitmq.yml"
   - git push origin vprofile-stack
+
+
+#### 4.9 Create Playbook for Tomcat
+
+- Create template file for the tomcat service 
+- Create file `tomcat8-ubuntu-svcfile.j2` inside the `provision-stack/templates` directory.
+
+- vi tomcat8-ubuntu-svcfile.j2
+```
+[Unit]
+Description=Tomcat
+After=network.target
+
+[Service]
+User=tomcat
+WorkingDirectory=/usr/local/tomcat8
+Environment=JRE_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre
+Environment=JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre
+Environment=CATALINA_HOME=/usr/local/tomcat8
+Environment=CATALINE_BASE=/usr/local/tomcat8
+ExecStart=/usr/local/tomcat8/bin/catalina.sh run
+ExecStop=/usr/local/tomcat8/bin/shutdown.sh
+SyslogIdentifier=tomcat-%i
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Create playbook file `appserver.yml` inside the the `provision-stack` directory.
+- This playbook includes
+  - Create variable using `vars` for timestamp and tomcat url.
+  - Install JDK using `apt` module.
+  - Download tomcat tar binary using `get_url` module.
+  - Create tomcat group using `group` module.
+  - Create tomcat user using `user` module.
+  - Create temporary directory `tomcat8` inside /tmp using `file` module.
+  - Extract tomcat binary inside `/tmp/tomcat8` using unarchive module. 
+  - Use `register` module to store the tomcat directory name. 
+  - Use `debug` module to get the exact name of tomcat directory.
+  - Synchronize the directory content with /usr/local/tomcat8 using `synchronize` module.
+  - Change the ownership of directory using `file` module. 
+  - For tomcat service use `template` module to include the template file.
+  - Reload the tomcat configuration using `systemd` module.
+  - Start and Enable the tomcat service using `service` module
+  - Using `stat` module check ROOT directory in webapps and store stat using in `register` module 
+  - Stop the tomcat service using `service` module. 
+  - Use `block` and `rescue` for the steps requited to deploy the artifact.
+  - Archive ROOT directoey with `archive` module only when `stat` exists.
+  - Copy ROOT directory with old_ROOT directory name using `shell` module.
+  - Delete the current artifact ROOT and ROOT.war using `file` module.
+  - Deploy the artifact in /usr/local/tomcat8/webapps using `copy` module, if it fails use `rescue` block to restore the old_ROOT directory.
+  - Start the tomcat service using `service` module.
+  - Use `wait_for` module to extract ROOT directory
+  - Deploy web configuration file i.e. template `application.j2` to the destination `/usr/local/tomcat8/webapps/ROOT/WEB-INF/classes/application.properties`
+  - Using `handlers` restart the tomcat service.
+
+
+- vi appserver.yml
+
+```
+---
+- name: Setup Tomcat8 & Deploy Artifact
+  hosts: appsrvgrp
+  #  gather_facts: no
+  vars:
+    timestamp: "{{ansible_date_time.date}}_{{ansible_date_time.hour}}_{{ansible_date_time.minute}}"
+    tom_url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz
+  tasks:
+    - name: Install JDK on Ubuntu 18/20
+      apt:
+        name: openjdk-8-jdk
+        state: present
+        update_cache: yes
+
+    - name: Download Tomcat Tar Ball/Binaries
+      get_url:
+        url: "{{tom_url}}"
+        dest: /tmp/tomcat-8.tar.gz
+
+    - name: Add tomcat group
+      group:
+        name: tomcat
+        state: present
+
+    - name: Add tomcat user
+      user:
+        name: tomcat
+        group: tomcat
+        shell: /bin/nologin
+        home: /usr/local/tomcat8
+
+    - file:
+        path: /tmp/tomcat8
+        state: directory
+
+    - name: Extract tomcat
+      unarchive:
+        src: /tmp/tomcat-8.tar.gz
+        dest: /tmp/tomcat8/
+        remote_src: yes
+        list_files: yes
+      register: unarchive_info
+
+    - debug:
+        msg: "{{unarchive_info.files[0].split('/')[0]}}"
+
+    - name: Synchronize /tmp/tomcat8/tomcat_cont /usr/local/tomcat8.
+      synchronize:
+        src: "/tmp/tomcat8/{{unarchive_info.files[0].split('/')[0]}}/"
+        dest: /usr/local/tomcat8/
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Change ownership of /usr/local/tomcat8
+      file:
+        path: /usr/local/tomcat8
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+
+    - name: Setup tomcat SVC file on ubuntu 16 and 18
+      template:
+        src: templates/tomcat8-ubuntu-svcfile.j2
+        dest: /etc/systemd/system/tomcat8.service
+        mode: "a+x"
+
+    - name: just force systemd to reread configs (2.4 and above)
+      systemd:
+        daemon_reload: yes
+
+    - name: Start & Enable tomcat SVC
+      service:
+        name: tomcat8
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+    - stat:
+        path: /usr/local/tomcat8/webapps/ROOT
+      register: artifact_stat
+      tags:
+        - deploy
+
+    - name: Stop tomcat8 svc
+      service:
+        name: tomcat8
+        state: stopped
+      tags:
+        - deploy
+
+    - name: Try Backup and Deploy
+      block:
+        - name: Archive ROOT dir with timestamp
+          archive:
+            path: /usr/local/tomcat8/webapps/ROOT
+            dest: "/opt/ROOT_{{timestamp}}.tgz"
+          when: artifact_stat.stat.exists
+          register: archive_info
+          tags:
+            - deploy
+
+        - name: copy ROOT dir with old_ROOT name
+          shell: cp -r ROOT old_ROOT
+          args:
+            chdir: /usr/local/tomcat8/webapps/
+
+        - name: Delete current artifact
+          file:
+            path: "{{item}}"
+            state: absent
+          when: archive_info.changed
+          loop:
+            - /usr/local/tomcat8/webapps/ROOT
+            - /usr/local/tomcat8/webapps/ROOT.war
+          tags:
+            - deploy
+
+        - name: Try deploy artifact else restore from previos old_ROOT
+          block:
+            - name: Deploy vprofile artifact
+              copy:
+                src: files/ROOT.war
+                dest: /usr/local/tomcat8/webapps/ROOT.war
+              register: deploy_info
+              tags:
+                - deploy
+          rescue:
+            - shell: cp -r old_ROOT ROOT
+              args:
+                chdir: /usr/local/tomcat8/webapps/
+
+      rescue:
+        - name: Start tomcat8 svc
+          service:
+            name: tomcat8
+            state: started
+
+    - name: Start tomcat8 svc
+      service:
+        name: tomcat8
+        state: started
+      when: deploy_info.changed
+      tags:
+        - deploy
+
+    - name: Wait until ROOT.war is extracted to ROOT directory
+      wait_for:
+        path: /usr/local/tomcat8/webapps/ROOT
+      tags:
+        - deploy
+
+    - name: Deploy web configuration file
+      template:
+        src: templates/application.j2
+        dest: /usr/local/tomcat8/webapps/ROOT/WEB-INF/classes/application.properties
+        force: yes
+      notify:
+        - Restart Tomcat
+      tags:
+        - deploy
+
+  handlers:
+    - name: Restart Tomcat
+      service:
+        name: tomcat8
+        state: restarted
+```
