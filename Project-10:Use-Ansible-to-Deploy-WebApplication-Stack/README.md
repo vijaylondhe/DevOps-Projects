@@ -1370,3 +1370,12 @@ WantedBy=multi-user.target
   - git add .
   - git commit -m "added web.yml"
   - git push origin vprofile-stack
+
+
+### Step 5: Execution of Master Playbook and Validation:
+
+- Go to the `provision-stack` directory.
+- Execute the playbook
+- `ansible-playbook site.yml`
+- After playbook execution go to the ELB service.
+- Get the ELB endpoint and test in browser.
