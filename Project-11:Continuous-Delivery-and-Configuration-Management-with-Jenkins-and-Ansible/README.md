@@ -18,4 +18,4 @@
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro-11-cicd-ansible.jpg)
+![GitHub Light](./snaps/pro-11-cicd-ansible1.jpg)
