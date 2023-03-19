@@ -50,4 +50,61 @@ In this project we will use Jenkins as continuous integration tool to build the 
 ![GitHub Light](./snaps/ci-pipeline-from-pro05.png)
 
 
-### Step 2:
+### Step 2: Create IAM User, S3 Bucket & Elastic Beanstalk Application: 
+
+#### Create IAM User with required access
+  - Log in to AWS console 
+  - Go to the IAM Service 
+```
+Username: cicd-eb
+Set Permissions: Attach policies directly
+- AmazonS3FullAccess
+- AdministratorAccess-AWSElasticBeanstalk
+```
+- Click on user -> Security Credentials -> Access Keys (Click on Create Access key)
+
+
+![GitHub Light](./snaps/pro12-iam-user.png)
+
+#### Create Credentials in Jenkins for IAM User
+
+- Go to the Jenkins console 
+- Install Jenkins Plugin : CloudBees AWS Credentials
+- Click on Manage Jenkins -> Manage Credentials -> Add Credentials
+
+```
+Kind: AWS Credentials
+ID: awsebcreds
+Description: awsebcreds
+Provide AccessKeyID
+Provide Secret Access Key
+```
+
+#### Create S3 bucket to store the artifact
+
+- Go to the S3 service
+- Bukcet Name: vproapp-cicd-eb-815
+- Create Bucket 
+
+![GitHub Light](./snaps/pro12-s3-bucket.png)
+
+#### Create Elastic Beanstalk Application
+
+- Go to the Elastic Beanstalk service
+- Click on Create Application 
+
+```
+Name: vpro-app
+Platform: Tomcat
+Click on Custom configuration
+Capacity:
+- Load Balanced
+  - Min: 2
+  - Max: 4
+InstanceType: t2.medium
+- Rolling updates and deployments
+  - Policy: Rolling
+  - 50 %
+```
+
+![GitHub Light](./snaps/pro12-eb-app.png)
