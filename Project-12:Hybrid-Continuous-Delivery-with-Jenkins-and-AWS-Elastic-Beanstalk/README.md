@@ -33,3 +33,21 @@ In this project we will use Jenkins as continuous integration tool to build the 
    - Create new beanstalk environment for prod 
    - Create new branch for prod 
    - Jenkinsfile, create new pipeline for the prod 
+
+
+### Step 1: Check CI Pipeline and Webhook:
+
+- Please refer Project-05 for CI pipeline 
+- This project is continuation of Project-05
+- Make Sure following pre-requisites are already configured
+  - Sonar Token and Sonar Server configuration in Jenkins 
+  - Credential for nexus 
+  - Github token
+  - Update the Github Webhook with Jenkins Public IP Address
+
+- Below is the Pipeline output of CI-Pipeline from Project-05
+
+![GitHub Light](./snaps/ci-pipeline-from-pro05.png)
+
+
+### Step 2:
