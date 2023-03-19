@@ -176,5 +176,116 @@ Branch: */cicd-jenkins-eb-stage
 
 ![GitHub Light](./snaps/pro-12-pipeline-stage.png)
 
+- Go to the Elastic beanstalk service 
+- Check the Environment `Vproapp-env`
 
-### Step 3: Create Jenkins Pipeline for Production Environment:
+![GitHub Light](./snaps/pro-12-eb-stage-env.png)
+
+
+### Step 4: Create Prod Environment in Elastic Beanstalk
+
+- Go to the Elastic beastalk service 
+- Click on `Create New Environment`
+- Select the `web server enviroment`
+```
+Envirorment Name: Vproapp-prod-env-1
+Domain Name: Vproapp-prod-env-815
+Platform: Tomcat 
+Application Code: Sample Application
+Click on Custom configuration
+Capacity:
+- Load Balanced
+  - Min: 2
+  - Max: 4
+InstanceType: t2.medium
+- Rolling updates and deployments
+  - Policy: Rolling
+  - 50 %
+```
+
+- After creation of environment make sure to change the health check path of load balancer to `/login`
+
+![GitHub Light](./snaps/pro-12-eb-prod-env.png)
+
+
+### Step 5: Create Jenkins Pipeline for Production Environment:
+
+#### Create New Branch for prod
+
+- Go to `vprociproject` repository
+- Create new branch `cicd-jenkins-eb-prod`
+```
+git checkout -b cicd-jenkins-eb-prod
+```
+
+- In Jenkinsfile get the last successful build number from the staging pipeline and store in it variable.
+
+- Edit the Jenkinsfile and add environment variables and the stage for deploy to elastic beanstack prod environment.
+
+- vi Jenkinsfile
+```
+def buildNumber = Jenkins.instance.getItem('cicd-jenkins-bean-stage').lastSuccessfulBuild.number
+pipeline {
+    agent any 
+    environment {
+        //environment for prod eb env 
+        ARTIFACT_NAME = "vprofile-v${BUILD_ID}.war"
+        AWS_S3_BUCKET = 'vproapp-cicd-eb-815'
+        AWS_EB_APP_NAME = 'vpro-app'
+        AWS_EB_ENVIRONMENT = 'Vproapp-prod-env-1'
+        AWS_EB_APP_VERSION = "${buildNumber}"
+
+    }
+    stages {
+        stage('Deploy to Prod'){
+            steps {
+                withAWS(credentials: 'awsebcreds', region: 'us-east-1'){
+                    sh 'aws elasticbeanstalk update-environment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIRONMENT --version-label $AWS_EB_APP_VERSION' 
+                }
+            }
+        }
+    }
+}
+
+```
+
+- Commit and Push to the git repository
+- git add . 
+- git commit -m "added stage for eb deploy to prod"
+- git push origin cicd-jenkins-eb-prod
+
+
+#### Create Pipeline 
+- Go to the Jenkins console 
+- Create New Pipeline 
+
+```
+Name: cicd-jenkins-beanstalk-prod
+Kind: pipeline
+Pipeline from SCM
+SSH GitHub URL
+githublogin credentials
+Branch: */cicd-jenkins-eb-prod
+```
+- Click on Build Now 
+
+- See the build output, you will get an error like below 
+
+![GitHub Light](./snaps/pro-12-jenkins-error.png)
+
+- Click on the link `Administrators can decide whether to approve or reject this signature`
+
+
+![GitHub Light](./snaps/pro-12-jenkins-error-1.png)
+
+- Click on Approve
+
+- Run the pipeline again, now our pipeline will get executed successfully.
+
+![GitHub Light](./snaps/pro-12-pipeline-prod.png)
+
+
+- Go to the Elastic beanstalk service 
+- Check the Environment `Vproapp-prod-env-1`
+
+![GitHub Light](./snaps/pro-12-prod-env-eb-update.png)
