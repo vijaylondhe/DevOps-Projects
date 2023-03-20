@@ -11,7 +11,7 @@
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro-13-dockerize-java-app.drawio.png)
+![GitHub Light](./snaps/pro-13-dockerize-java-app.drawio1.png)
 
 ### Flow of Execution:
 - Find the right base images from the dockerhub
