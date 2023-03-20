@@ -1,9 +1,7 @@
 # Project-13: Use Docker to Containerize the Java Application
 
 ### Objective:
-- In this project we will use the docker to containerize the complete web application stack.
-- We will build the docker image from the base images available in dockerhub public repository then store this images in dockerhub.
-- Using docker compose test the docker images 
+- In this project we will use the docker to containerize the complete web application stack. We will build the docker images from the base images available in the dockerhub public repository then store this images in dockerhub and later using docker compose to run the multiple containers. 
 
 
 ### Tools & Services Used:
