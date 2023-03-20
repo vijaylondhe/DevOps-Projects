@@ -161,3 +161,76 @@ location / {
 ```
 
 ![GitHub Light](./snaps/pro-13-docker-images.png)
+
+
+### Step 6: Setup Docker Compose:
+
+- Install docker compose on the ubuntu server
+
+```
+sudo curl -SL https://github.com/docker/compose/releases/download/v2.14.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+```
+
+```
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+```
+docker-compose --version
+```
+
+- Create docker compose file 
+
+- vi docker-compose.yml
+```
+version: '3'
+services:
+  vprodb:
+    image: vijay815/vprofiledb:V1
+    container_name: vprodb 
+    ports:
+      - "3306:3306"
+    volumes:
+      - vprodbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=vprodbpass
+
+  vprocache01:
+    image: memcached
+    container_name: vprocache01
+    ports:
+      - "11211:11211"
+
+  vpromq01:
+    image: rabbitmq
+    container_name: vpromq01
+    ports:
+      - "15672:157672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  vproapp:
+    image: <your_dockerhub_username>/vprofileapp:V1
+    container_name: vproapp 
+    ports:
+      - "8080:8080"
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps
+
+  vproweb:
+    image: <your_dockerhub_username>/vprofileweb:V1 
+    container_name: vproweb 
+    ports:
+      - "80:80"
+
+volumes:
+  vprodbdata: {}
+  vproappdata: {}
+```
+
+- Run the docker compose file 
+- docker-compose up -d 
+
+
+    
