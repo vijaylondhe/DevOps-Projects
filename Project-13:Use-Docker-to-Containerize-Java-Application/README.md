@@ -142,19 +142,22 @@ location / {
 
 
 - Build docker image for tomcat app
+```
   - cd Docker-files/app
   - docker build -t vijay815/vprofileapp:V1 .
   - docker images 
-
+```
 - Build docker image for MySQL
+```
   - cd Docker-files/db
   - docker build -t vijay815/vprofiledb:V1 .
   - docker images
-
+```
 - Build docker image for Nginx
+```
   - cd Docker-files/web
   - docker build -t vijay815/vprofileweb:V1 .
   - docker images
-
+```
 
 ![GitHub Light](./snaps/pro-13-docker-images.png)
