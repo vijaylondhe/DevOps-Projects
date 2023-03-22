@@ -15,7 +15,7 @@ Note: In this project, we will use GoDaddy as our domain registrar, create NS re
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro-14-kops-aws.drawio1.png)
+![GitHub Light](./snaps/pro-14-kops-aws.drawio2.png)
 
 
 ### Step 1: Create EC2 Instance:
