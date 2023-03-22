@@ -1,6 +1,7 @@
 # Project-14: Install Kubernetes Cluster On AWS Using kOps
 
 ### Objective:
+- Install multi node kubernetes cluster on AWS Cloud using kOps.
 
 ### Prerequisites:
 - Domain Name for Kubernetes DNS Records
