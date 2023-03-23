@@ -99,5 +99,33 @@ kubectl --version
 
 - Install kOps:
 
+```
+curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+
+chmod +x kops-linux-amd64
+
+sudo mv kops-linux-amd64 /usr/local/bin/kops
+
+nslookup -type=ns kubevpro.cloudndevops.in
+
+kops create cluster --name=kubevpro.cloudndevops.in \
+--state=s3://vprofile-kops-state-815 --zones=us-east-1a,us-east-1b \
+--node-count=2 --node-size=t3.medium --master-size=t3.medium \
+--dns-zone=kubevpro.cloudndevops.in \
+--node-volume-size=8 --master-volume-size=8 
 
 
+kops update cluster --name=kubevpro.cloudndevops.in \
+--state=s3://vprofile-kops-state-815 --yes --admin 
+```
+
+- Validate the Cluster:
+```
+kops validate cluster --state=s3://vprofile-kops-state-815
+
+cat ~/.kube/config 
+
+kubectl get nodes
+```
+
+- Go to the AWS console and check the EC2 service for instance and auto scaling groups.
