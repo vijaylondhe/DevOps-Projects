@@ -40,6 +40,7 @@ Key Pair: kops-key
   - Bucket Name: `vprofile-kops-state-815`
   - Region: `us-east-1`
 
+![GitHub Light](./snaps/pro-14-s3-bucket.png)
 
 - Create IAM User: 
   - Go to the IAM service 
@@ -51,12 +52,16 @@ Key Pair: kops-key
   - Click on Create User
   - Note down Access Key ID and Secret Access Key 
 
+![GitHub Light](./snaps/pro-14-iam-user.png)
+
 - Create Route53 hosted zone:
   - Go to Route53 service
   - Click on Create Hosted Zone 
   - Domain Name: kubevpro.cloudndevops.in
   - Select: Public Hosted Zone 
   - Check and note down the NS records 
+
+![GitHub Light](./snaps/pro-14-public-hosted-zone.png)
 
 
 ### Step 2: Add NS Records in DNS Registrar:
@@ -96,6 +101,7 @@ sudo mv kubectl /usr/local/bin/
 kubectl --version
 ```
 
+![GitHub Light](./snaps/pro-14-kubectl-setup.png)
 
 - Install kOps:
 
@@ -108,16 +114,35 @@ sudo mv kops-linux-amd64 /usr/local/bin/kops
 
 nslookup -type=ns kubevpro.cloudndevops.in
 
+```
+![GitHub Light](./snaps/pro-14-kops-setup.png)
+
+
+- Create the Cluster:
+
+```
 kops create cluster --name=kubevpro.cloudndevops.in \
 --state=s3://vprofile-kops-state-815 --zones=us-east-1a,us-east-1b \
 --node-count=2 --node-size=t3.medium --master-size=t3.medium \
 --dns-zone=kubevpro.cloudndevops.in \
 --node-volume-size=8 --master-volume-size=8 
+```
+
+![GitHub Light](./snaps/pro-14-cluster-create-cmd.png)
 
 
+- Update the cluster using command shows in create cluster command output suggestion.
+
+![GitHub Light](./snaps/pro-14-cluster-create-op.png)
+
+
+```
 kops update cluster --name=kubevpro.cloudndevops.in \
 --state=s3://vprofile-kops-state-815 --yes --admin 
 ```
+
+![GitHub Light](./snaps/pro-14-update-cluster-cmd.png)
+
 
 - Validate the Cluster:
 ```
@@ -128,4 +153,9 @@ cat ~/.kube/config
 kubectl get nodes
 ```
 
+![GitHub Light](./snaps/pro-14-kops-final-op-1.png)
+
+
 - Go to the AWS console and check the EC2 service for instance and auto scaling groups.
+
+![GitHub Light](./snaps/pro-14-final-ec2-instances.png)
