@@ -228,3 +228,221 @@ spec:
 - kubectl get service 
 
 ![GitHub Light](./snaps/pro-15-db-service.png)
+
+
+### Step 7: Create Memcached Deployment and Service:
+
+- Create file for Memcached Deployment
+- vi mcdep.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpromc
+  labels:
+    app: vpromc
+spec:
+  selector:
+    matchLabels:
+      app: vpromc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vpromc
+    spec:
+      containers:
+        - name: vpromc
+          image: memcached
+          ports:
+            - name: vpromc-port
+              containerPort: 11211
+
+```
+
+- kubectl create -f mcdep.yaml
+- kubectl get deployment
+- kubectl get pods 
+
+![GitHub Light](./snaps/pro-15-memcache-deployment.png)
+
+- Create Service for Memcached Pod: 
+- vi mc-CIP.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: vprocache01
+spec:
+  ports:
+    - port: 11211
+      targetPort: vpromc-port
+      protocol: TCP
+  selector:
+    app: vpromc
+  type: ClusterIP
+
+```
+
+- kubectl create -f mc-CIP.yaml
+- kubectl get service
+
+
+![GitHub Light](./snaps/pro-15-memcache-service.png)
+
+
+
+### Step 8: Create RabbitMQ Deployment and Service:
+
+- Create file for RabbitMQ Deployment
+- vi rmq-dep.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpromq01
+  labels:
+    app: vpromq01
+spec:
+  selector:
+    matchLabels:
+      app: vpromq01
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vpromq01
+    spec:
+      containers:
+        - name: vpromq01
+          image: rabbitmq
+          ports:
+            - name: vpromq01-port
+              containerPort: 15672
+          env:
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: rmq-pass
+            - name: RABBITMQ_DEFAULT_USER
+              value: "guest"
+```
+
+- kubectl create -f rmq-dep.yaml
+- kubectl get deployment
+- kubectl get pods 
+
+![GitHub Light](./snaps/pro-15-rmq-deployment.png)
+
+- Create Service for RabbitMQ Pod: 
+- vi rmq-CIP.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpromq01
+spec:
+  ports:
+    - port: 15672
+      targetPort: vpromq01-port
+      protocol: TCP
+  selector:
+    app: vpromq01
+  type: ClusterIP
+
+```
+
+- kubectl create -f rmq-CIP.yaml
+- kubectl get service
+
+![GitHub Light](./snaps/pro-15-rmq-service.png)
+
+
+### Step 9: Create Tomcat Deployment and Service:
+
+- Create file for Tomcat Deployment
+- vi vproappdep.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vproapp
+  labels:
+    app: vproapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vproapp
+  template:
+    metadata:
+      labels:
+        app: vproapp
+    spec:
+      containers:
+        - name: vproapp
+          image: vprofile/vprofileapp:V1
+          ports:
+             - name: vproapp-port
+               containerPort: 8080
+      initContainers:
+        - name: init-mydb
+          image: busybox
+          command: ['sh', '-c', 'until nslookup vprodb; do echo waiting for mydb; sleep 2; done;']
+        - name: init-memcache
+          image: busybox
+          command: ['sh', '-c', 'until nslookup vprocache01; do echo waiting for mydb; sleep 2; done;']
+```
+- kubectl create -f vproappdep.yaml
+- kubectl get deployment
+- kubectl get pods 
+
+![GitHub Light](./snaps/pro-15-tomcat-deployment.png)
+
+- Create Service for Tomcat Pod: 
+- vi vproapp-service.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: vproapp-service
+spec:
+  ports:
+    - port: 80
+      targetPort: vproapp-port
+      protocol: TCP
+  selector:
+    app: vproapp
+  type: LoadBalancer
+
+```
+
+- kubectl create -f rmq-CIP.yaml
+- kubectl get service
+
+![GitHub Light](./snaps/pro-15-tomcat-service.png)
+
+
+### Step 10: Create Route53 Record for ELB:
+
+- Go to the Route53 Service 
+- Create A Record 
+  - Record Name: vproapp
+  - Route Traffic to: ALB Endpoint 
+  - Select Alias to Application and Classic Load Balancer
+  - Select Region: us-east-1
+  - Routing Policy: Simple routing
+
+![GitHub Light](./snaps/pro-15-route-53-a-record.png)
+
+
+### Step 10: Validate the Application
+
+- Open the browser and enter the URL `http://vproapp.kubevpro.cloudndevops.in`
+
+![GitHub Light](./snaps/pro-15-validate-url.png)
+
+- Login to the application 
+
+![GitHub Light](./snaps/pro-15-validate-url-1.png)
