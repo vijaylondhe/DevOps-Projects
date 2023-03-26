@@ -143,7 +143,7 @@ data:
 - git push origin main
 
 - On the kOps instance clone the source code and execute the secret manifest
-- git clone https://github.com/vijaylondhe/kube-app.git
+- `git clone https://github.com/vijaylondhe/kube-app.git`
 
 ![GitHub Light](./snaps/pro-15-create-secret.png)
 
