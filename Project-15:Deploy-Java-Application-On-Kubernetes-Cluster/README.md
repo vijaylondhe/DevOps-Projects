@@ -154,7 +154,7 @@ data:
 - Search the EBS created in Step 2
 - Create Tag for EBS volume 
 ```
-KubernetesCluster = kubevpro.cloudndevops.in
+KubernetesCluster=kubevpro.cloudndevops.in
 ```
 
 - Create file for DB Deployment
@@ -437,7 +437,7 @@ spec:
 ![GitHub Light](./snaps/pro-15-route-53-a-record.png)
 
 
-### Step 10: Validate the Application
+### Step 11: Validate the Application
 
 - Open the browser and enter the URL `http://vproapp.kubevpro.cloudndevops.in`
 
