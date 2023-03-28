@@ -8,4 +8,4 @@ Deploy and manage the state of the AWS Infrastructre using terraform.
 
 ### Architecture:
 
-![GitHub Light](./snaps/pro-16-terraform-aws.drawio.png)
+![GitHub Light](./snaps/pro-16-terraform-aws.drawio1.png)
