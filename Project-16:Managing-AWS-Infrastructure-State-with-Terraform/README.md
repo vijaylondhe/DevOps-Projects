@@ -178,7 +178,7 @@ variable "PrivSub3CIDR" {
 ### Step 6: Create Terraform file for VPC Configuration:
 - To setup the VPC, we will use the `vpc` module from the terraform.
 
-- Plese check terraform documentation for module registry `https://registry.terraform.io`
+- Please check terraform documentation for module registry `https://registry.terraform.io`
 
 - vi vpc.tf
 ```
