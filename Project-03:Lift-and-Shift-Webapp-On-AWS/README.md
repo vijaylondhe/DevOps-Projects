@@ -37,7 +37,7 @@ Following AWS services will be used
 
 - Login to the AWS account and select N.Virginia as region
 
-![GitHub Light](./snaps/Login.png)
+![GitHub Light](./snaps/Login1.png)
 
 - Go to Certificate Manager service and click on Request a Certificate 
 
