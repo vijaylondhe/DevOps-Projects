@@ -306,8 +306,8 @@ Credentials: githublogin
 branch: */main
 Script Path: Jenkinsfile
 ```
-- Save the Pipeline and Click on Build Now.
-- You will see pipeline started building, check the build logs.
+- Save the Pipeline and Click on `Build Now`.
+- You will see the pipeline started building, check the build logs.
 
 ![GitHub Light](./snaps/pro-17-pipeline-log.png)
 
