@@ -1002,8 +1002,8 @@ Resources:
 
 ### Step 10: Create Nested Stack:
 
-- Go to the S3 service 
-- Upload the child templates in `stack-template` folder 
+- Go to the S3 service, click on `vprofile-cicd-template-815` bucket
+- Upload the child templates inside the `stack-template` folder 
 - Go to the Cloudformation service 
 - Create Stack
 - Uplaod the `cicdtemp.yml` template 
